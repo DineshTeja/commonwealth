@@ -4,12 +4,14 @@ const nextConfig = {
         return [
           {
             source: "/get_articles",
-            destination: "http://127.0.0.1:8080/get_articles",
+            // destination: "http://127.0.0.1:8080/get_articles",
+            destination: "https://commonwealthai.netlify.app/get_articles",
           },
           // Add this new rewrite for call_openai
           {
             source: "/call_ai",
-            destination: "http://127.0.0.1:8080/call_ai", 
+            // destination: "http://127.0.0.1:8080/call_ai", 
+            destination: "https://commonwealthai.netlify.app/call_ai", 
           },
         ];
     },
