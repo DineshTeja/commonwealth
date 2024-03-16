@@ -45,12 +45,16 @@ export default function MessagesProvider({
     });
   }, []);
 
+  const clearMessages = useCallback(() => {
+    setMessages([]); // Clear the messages array
+  }, []);
+
   useEffect(() => {
     console.log("Messages updated:", messages);
   }, [messages]);
 
   return (
-    <MessagesContext.Provider value={{ messages, addMessage }}>
+    <MessagesContext.Provider value={{ messages, addMessage, clearMessages }}>
       {children}
     </MessagesContext.Provider>
   );

@@ -3,8 +3,8 @@ import "./globals.css";
 import MessagesProvider from "@/datasources/messagesContext";
 
 export const metadata: Metadata = {
-  title: "Influence AI",
-  description: "Generative AI search for brand ambassadors",
+  title: "Commonwealth AI",
+  description: "an obviously simple political digest.",
 };
 
 export default function RootLayout({

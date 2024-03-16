@@ -1,116 +1,260 @@
 "use client";
-import ReactTextareaAutosize from "react-textarea-autosize";
-import {
-  ChevronRightIcon,
-  Square,
-  StopCircle,
-  StopCircleIcon,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { useEffect, useRef, useState } from "react";
-import MessagesProvider, { useMessages } from "@/datasources/messagesContext";
-import { v4 as uuidv4 } from "uuid";
-import ChatView from "@/components/ui/chatView";
+import React, { useEffect, useState } from "react";
+import ArticlesComponent from "@/components/ui/articles";
+import axios from "axios";
+import { getFunctions, httpsCallable } from "firebase/functions";
+import { initializeApp } from "firebase/app";
+import { firebaseConfig } from "../firebaseConfig.ts"; // Ensure you have this config set up
+import { collection, getDocs, addDoc, deleteDoc, getFirestore } from "firebase/firestore";
+import { useCallback } from "react";
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const functions = getFunctions(app);
+const db = getFirestore(app);
 
 function View() {
-  const [isAnswering, setIsAnswering] = useState(false);
-  const [chatInput, setChatInput] = useState("");
-  const bottomRef = useRef<HTMLDivElement | null>(null);
+  const [articles, setArticles] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isEmpty, setIsEmpty] = useState(false);
+  const [isFirebaseReady, setIsFirebaseReady] = useState(false);
+  const [articlesJson, setArticlesJson] = useState([]);
 
-  const { messages, addMessage } = useMessages();
+  useEffect(() => {
+    setIsFirebaseReady(true);
+  }, []);
 
-  const handleSubmit = () => {
-    if (chatInput.trim() === "") return;
-    setChatInput("");
+  async function fetchAllFromArticlesJson() {
+    try {
+      const articlesJsonCol = collection(db, "articlesJson");
+      const snapshot = await getDocs(articlesJsonCol);
+      const articlesJsonList = snapshot.docs.map((doc) => doc.data());
+      console.log(articlesJsonList);
 
-    setIsAnswering(true);
+      console.log("made it to fetcharticlesfromjson");
 
-    console.log("Adding", chatInput, "to messages.");
+      setArticles(articlesJsonList);
+      console.log("set articles");
+    } catch (error) {
+      console.error("Error fetching articles from articlesJson:", error);
+    }
+  }
 
-    addMessage(
-      {
-        id: uuidv4(),
-        text: chatInput,
-        timestamp: Date.now(),
-        sender: "user",
+  async function manualProcessArticles() {
+    const articlesCol = collection(db, "articles");
+    const articleSnapshot = await getDocs(articlesCol);
+    const articlesList = articleSnapshot.docs.map((doc) => doc.data().url);
+
+    console.log("articles here");
+    console.log(articlesList);
+
+    const articlesResponse = await fetch("/get_articles", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
       },
-      "new"
+      body: JSON.stringify({ urls: articlesList }),
+    });
+
+    console.log(articlesResponse);
+
+    if (!articlesResponse.ok) {
+      throw new Error(`HTTP error! status: ${articlesResponse.status}`);
+    }
+
+    const contentType = articlesResponse.headers.get("content-type");
+    if (!contentType || !contentType.includes("application/json")) {
+      throw new Error("Received non-JSON response from server.");
+    }
+
+    const articlesData = await articlesResponse.json();
+
+    const articlesJsonCol = collection(db, "articlesJson");
+    for (const article of articlesData) {
+      await addDoc(articlesJsonCol, article);
+    }
+  }
+
+  const fetchArticlesFromFirestore = useCallback(async (manual: boolean) => {
+    setIsLoading(true);
+    const articlesCol = collection(db, "articles");
+    const articleSnapshot = await getDocs(articlesCol);
+    const articlesList = articleSnapshot.docs.map((doc) => doc.data().url);
+    console.log(articlesList);
+
+    const newArticlesCol = collection(db, "newArticles");
+    const newArticleSnapshot = await getDocs(newArticlesCol);
+    const newArticlesList = newArticleSnapshot.docs.map((doc) => doc.data().url);
+
+    try {
+      if (articlesList.length === 0) {
+        setIsEmpty(true);
+      } else {
+        if (manual) {
+          console.log("manualProcessArticles call");
+          console.log("new articles here");
+          console.log(newArticlesList);
+      
+          const articlesResponse = await fetch("/get_articles", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ urls: newArticlesList }),
+          });
+      
+          console.log(articlesResponse);
+      
+          if (!articlesResponse.ok) {
+            throw new Error(`HTTP error! status: ${articlesResponse.status}`);
+          }
+      
+          const contentType = articlesResponse.headers.get("content-type");
+          if (!contentType || !contentType.includes("application/json")) {
+            throw new Error("Received non-JSON response from server.");
+          }
+      
+          const articlesData = await articlesResponse.json();
+      
+          const articlesJsonCol = collection(db, "articlesJson");
+          for (const article of articlesData) {
+            await addDoc(articlesJsonCol, article);
+          }
+
+          console.log("New articles collection cleared.");
+
+          fetchAllFromArticlesJson();
+        } else {
+          fetchAllFromArticlesJson();
+        }
+
+        for (const doc of newArticleSnapshot.docs) {
+          await deleteDoc(doc.ref);
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching articles:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  // Function to manually trigger the scrape and store process
+  const triggerManualScrape = async () => {
+    setIsLoading(true);
+    setIsEmpty(false);
+
+    console.log("trigger manual scrape");
+    const manualScrapeAndStoreArticles = httpsCallable(
+      functions,
+      "manualScrapeAndStoreArticles"
     );
 
-    // CHANGE LATER
-    addMessage(
-      {
-        id: uuidv4(),
-        text: "Add response feature later",
-        timestamp: Date.now(),
-        sender: "ai",
-      },
-      "new"
+    console.log(
+      "Callable function reference created:",
+      manualScrapeAndStoreArticles.name
     );
 
-    setIsAnswering(false);
+    try {
+      console.log("try trigger manual scrape");
+
+      const fetchedurls = await manualScrapeAndStoreArticles({});
+      console.log("Function call result:", fetchedurls);
+
+      await fetchArticlesFromFirestore(true);
+    } catch (error) {
+      console.error("Error triggering manual scrape:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
-  }, [messages]);
+    // Only attempt to fetch articles if Firebase has been initialized
+    if (isFirebaseReady) {
+      fetchArticlesFromFirestore(false);
+    }
+  }, [isFirebaseReady, fetchArticlesFromFirestore]);
+
+  // useEffect(() => {
+  //   const fetchUrlsAndArticles = async () => {
+  //     setIsLoading(true); // Start loading
+
+  //     const searchQuery = `political articles + news + trending`;
+  //     try {
+  //       // Fetch URLs from the Scrape-it.cloud API
+  //       const response = await axios.get(
+  //         `https://api.scrape-it.cloud/scrape/google?q=${encodeURIComponent(
+  //           searchQuery
+  //         )}&tbm=nws&start=5&num=500&when=6d`,
+  //         {
+  //           headers: {
+  //             "x-api-key": process.env.NEXT_PUBLIC_SCRAPE_IT_API_KEY,
+  //             "Content-Type": "application/json",
+  //           },
+  //         }
+  //       );
+
+  //       if (response.data && response.data.newsResults) {
+  //         const fetchedUrls = response.data.newsResults.map(
+  //           (result) => result.link
+  //         );
+
+  //         console.log(fetchedUrls);
+
+  //         // Send URLs to Flask backend to fetch articles' content
+  //         const articlesResponse = await fetch("/get_articles", {
+  //           method: "POST",
+  //           headers: {
+  //             "Content-Type": "application/json",
+  //           },
+  //           body: JSON.stringify({ urls: fetchedUrls }),
+  //         });
+
+  //         const articlesData = await articlesResponse.json();
+  //         setArticles(articlesData); // Store fetched articles in state
+  //       } else {
+  //         console.error("Unexpected API response structure:", response.data);
+  //       }
+  //     } catch (error) {
+  //       console.error("Failed to fetch URLs or articles:", error);
+  //     } finally {
+  //       setIsLoading(false); // End loading
+  //     }
+  //   };
+
+  //   fetchUrlsAndArticles();
+  // }, []); // Empty dependency array means this effect runs only once on mount
 
   return (
-    <main className="flex h-screen flex-col items-center justify-between py-12 px-16 gap-8">
-      {/* Main content */}
-      <div className="flex flex-col w-full overflow-scroll">
-        {/* Title card */}
-        <div className="flex flex-col items-center gap-1 p-12">
+    <main className="flex h-screen flex-col items-center justify-between py-12 px-16 gap-8 bg-gradient-to-b from-purple-100 via-purple-50 to-white">
+      <div className="w-full">
+        <div className="flex flex-col items-center gap-1 p-12 w-full">
           <div className="font-extrabold text-3xl text-slate-800">
-            Influence.ai
+            Commonwealth.ai
           </div>
           <div className="text-slate-500 font-medium">
-            Find your next brand ambassador using AI
+            an obviously simple political digest.
           </div>
+          {/* Add a button to manually trigger the scrape */}
+          <button
+            onClick={triggerManualScrape}
+            className="mt-4 py-1 px-3 bg-purple-400 text-white rounded-3xl hover:bg-purple-500"
+          >
+            Refresh Database
+          </button>
         </div>
-
-        {/* Chat view */}
-        <div className="flex flex-col gap-6 w-full">
-          {messages.map((message) => (
-            <ChatView key={message.id} message={message} />
-          ))}
-        </div>
-
-        <div ref={bottomRef} />
-      </div>
-
-      {/* Text input */}
-      <div className="flex flex-row gap-2 w-full border border-slate-200 rounded-xl bg-white">
-        <ReactTextareaAutosize
-          placeholder="Chat with Influence.ai"
-          value={chatInput}
-          disabled={isAnswering}
-          onChange={(e) => setChatInput(e.target.value)}
-          className="resize-none w-full text-sm p-3 bg-transparent focus:outline-none"
-          maxRows={6}
-          maxLength={1024}
+        <ArticlesComponent
+          articles={articles}
+          articlesJson={articlesJson}
+          isLoading={isLoading}
+          isEmpty={isEmpty}
         />
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-full aspect-square rounded-xl transition-all"
-          onClick={() => handleSubmit()}
-        >
-          {isAnswering ? (
-            <StopCircleIcon className="text-slate-600" />
-          ) : (
-            <ChevronRightIcon className="text-teal-600" />
-          )}
-        </Button>
       </div>
     </main>
   );
 }
 
 export default function Home() {
-  return (
-    <MessagesProvider>
-      <View />
-    </MessagesProvider>
-  );
+  return <View />;
 }
