@@ -11,6 +11,7 @@ import { v4 as uuidv4 } from "uuid";
 import ChatView from "@/components/ui/chatView";
 // import CircularProgress from '@mui/material/CircularProgress'; // Import CircularProgress for the loading spinner
 import Image from 'next/image';
+import { ArticleType } from "@/components/ui/articles"; // Import ArticleType
 
 // Adjusted utility function to display dash lists as bullet lists
 function formatTextToHTML(text: string) {
@@ -31,7 +32,13 @@ function formatTextToHTML(text: string) {
     });
 }
 
-function DetailedView({ open, onClose, article }) {
+interface DetailedViewProps {
+    open: boolean;
+    onClose: () => void;
+    article?: ArticleType | null; // Allow `article` to be `null`
+}
+
+function DetailedView({ open, onClose, article }: DetailedViewProps) {
     const { messages, addMessage, clearMessages } = useMessages();
     const [isAnswering, setIsAnswering] = useState(false);
     const [chatInput, setChatInput] = useState("");
@@ -40,7 +47,7 @@ function DetailedView({ open, onClose, article }) {
     const [hasGenerated, setHasGenerated] = useState(false); // Flag to track if the response has been generated
     const [isLoading, setIsLoading] = useState(false); // State to track loading status
 
-    const handleSubmit = useCallback(async (articleText) => {
+    const handleSubmit = useCallback(async (articleText: string) => {
         if (hasGenerated) return; // Prevent running if already generated
         setIsLoading(true); // Start loading
 
@@ -56,7 +63,7 @@ function DetailedView({ open, onClose, article }) {
     }, [hasGenerated]);
 
     // Add this function inside your ArticleDialog component
-    const callOpenAI = async (input, articleText) => {
+    const callOpenAI = async (input: string, articleText: string) => {
         const response = await fetch("/call_ai", {
             method: "POST",
             headers: {
@@ -75,10 +82,11 @@ function DetailedView({ open, onClose, article }) {
     };
 
     useEffect(() => {
-        if (open && article.content && !hasGenerated) {
+        // No need for optional chaining before `.content` as `article` is either `ArticleType` or `undefined`
+        if (open && article?.content && !hasGenerated) {
             handleSubmit(article.content);
         }
-    }, [article.content, handleSubmit, open, hasGenerated]);
+    }, [article?.content, handleSubmit, open, hasGenerated]);
 
     useEffect(() => {
         if (open) {
@@ -104,7 +112,7 @@ function DetailedView({ open, onClose, article }) {
                 <div className="flex flex-col w-full overflow-scroll">
                     <div className="flex flex-col items-center justify-center gap-1 p-12 text-center">
                         <div className="font-extrabold text-3xl text-slate-800">
-                            {article.title}
+                            {article?.title}
                         </div>
                         <div className="text-slate-500 font-medium">
                             Detailed View

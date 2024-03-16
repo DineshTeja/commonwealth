@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import Masonry from "@mui/lab/Masonry"; // Import from MUI
-import ArticleDialog from "./ArticleDialog";
-import DetailedView from "./DetailedView";
+import ArticleDialog from "./articledialog";
+import DetailedView from "./detailedView";
 import MessagesProvider, { useMessages } from "@/datasources/messagesContext";
 import { Close as CloseIcon } from "@mui/icons-material";
 
-function formatDate(isoDateString) {
+function formatDate(isoDateString: string) {
   if (!isoDateString || isoDateString === "Unknown") return "Not Given";
   const date = new Date(isoDateString);
   const month = (date.getMonth() + 1).toString().padStart(2, "0");
@@ -15,19 +15,35 @@ function formatDate(isoDateString) {
   return `${month}-${day}-${year}`;
 }
 
-function ArticlesComponent({ articles, articlesJson, isLoading, isEmpty }) {
+export interface ArticleType {
+  content: string;
+  publish_date: string;
+  source: string;
+  tags: string[];
+  text: string;
+  title: string;
+  url: string;
+}
+
+interface ArticlesComponentProps {
+  articles: ArticleType[];
+  isLoading: boolean;
+  isEmpty: boolean;
+}
+
+function ArticlesComponent({ articles, isLoading, isEmpty }: ArticlesComponentProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTag, setSelectedTag] = useState("All"); // New state for selected tag
-  const [selectedArticle, setSelectedArticle] = useState(null);
-  const [detailedArticle, setDetailedArticle] = useState(null);
+  const [selectedArticle, setSelectedArticle] = useState<ArticleType | null>(null);
+  const [detailedArticle, setDetailedArticle] = useState<ArticleType | null>(null);
 
   // Function to handle dialog open
-  const handleOpenDialog = (article) => {
+  const handleOpenDialog = (article: ArticleType) => {
     setSelectedArticle(article);
   };
 
   // Function to handle detailed view open
-  const handleOpenDetailedView = (article) => {
+  const handleOpenDetailedView = (article: ArticleType) => {
     setDetailedArticle(article);
   };
 
@@ -78,7 +94,7 @@ function ArticlesComponent({ articles, articlesJson, isLoading, isEmpty }) {
   ).sort();
 
   // Function to handle tag selection
-  const handleTagSelection = (e) => {
+  const handleTagSelection = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedTag(e.target.value);
   };
 
@@ -101,7 +117,7 @@ function ArticlesComponent({ articles, articlesJson, isLoading, isEmpty }) {
   //   return new URL(url).hostname.replace('www.', '').split('.')[0].toUpperCase();
   // };
 
-  const getHostname = (url) => {
+  const getHostname = (url: string) => {
     let hostname = new URL(url).hostname;
     // Remove 'www.' if present
     hostname = hostname.replace("www.", "");
@@ -114,7 +130,7 @@ function ArticlesComponent({ articles, articlesJson, isLoading, isEmpty }) {
   };
 
   // Group articles by source
-  const groupedArticles = articles.reduce((group, article) => {
+  const groupedArticles = articles.reduce<Record<string, ArticleType[]>>((group, article) => {
     const source = getHostname(article.url);
     if (!group[source]) {
       group[source] = [];
@@ -124,7 +140,7 @@ function ArticlesComponent({ articles, articlesJson, isLoading, isEmpty }) {
   }, {});
 
   // Updated filtering logic to include tag filtering
-  const filteredArticles = Object.entries(groupedArticles).reduce(
+  const filteredArticles = Object.entries(groupedArticles).reduce<Record<string, ArticleType[]>>(
     (acc, [source, articles]) => {
       const filtered = articles.filter(
         (article) =>
@@ -132,8 +148,8 @@ function ArticlesComponent({ articles, articlesJson, isLoading, isEmpty }) {
           article.tags &&
           article.tags.length > 0 &&
           (article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            article.text.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            source.toLowerCase().includes(searchQuery.toLowerCase())) &&
+           article.text.toLowerCase().includes(searchQuery.toLowerCase()) ||
+           source.toLowerCase().includes(searchQuery.toLowerCase())) &&
           (selectedTag === "All" || article.tags.includes(selectedTag)) // Filter by selected tag
       );
       if (filtered.length > 0) {
@@ -141,7 +157,7 @@ function ArticlesComponent({ articles, articlesJson, isLoading, isEmpty }) {
       }
       return acc;
     },
-    {}
+    {} // Initial value for the accumulator
   );
 
   // Filter out groups with no articles to display
@@ -266,17 +282,17 @@ function ArticlesComponent({ articles, articlesJson, isLoading, isEmpty }) {
       </Masonry>
 
       <MessagesProvider>
-        <ArticleDialog
-          open={!!selectedArticle}
-          onClose={handleCloseDialog}
-          article={selectedArticle || {}}
-        />
+      <ArticleDialog
+        open={!!selectedArticle}
+        onClose={handleCloseDialog}
+        article={selectedArticle} // Remove the fallback empty object
+      />
       </MessagesProvider>
 
       <DetailedView
-        open={!!detailedArticle}
-        onClose={() => setDetailedArticle(null)}
-        article={detailedArticle || {}}
+          open={!!detailedArticle}
+          onClose={() => setDetailedArticle(null)}
+          article={detailedArticle} // Directly pass `detailedArticle`, which is either `ArticleType` or `undefined`
       />
     </>
   );

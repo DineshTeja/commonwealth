@@ -10,9 +10,10 @@ import MessagesProvider, { useMessages } from "@/datasources/messagesContext";
 import { v4 as uuidv4 } from "uuid";
 import ChatView from "@/components/ui/chatView";
 import Image from "next/image";
-import { firebaseConfig } from "../../firebaseConfig.ts"; // Your Firebase config
+import { firebaseConfig } from "../../firebaseConfig";
 import { initializeApp } from "firebase/app";
 import { doc, collection, setDoc, getDoc, updateDoc, arrayUnion, addDoc, query, where, getDocs, orderBy, getFirestore } from "firebase/firestore";
+import { ArticleType } from "@/components/ui/articles"; // Import ArticleType
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
@@ -28,17 +29,31 @@ function formatTextToHTML(text: string) {
     ));
 }
 
-function ArticleDialog({ open, onClose, article }) {
+interface ArticleDialogProps {
+    open: boolean;
+    onClose: () => void;
+    article?: ArticleType | null; // Make article optional or allow null
+}
+  
+type Message = {
+    id: string;
+    text: string;
+    timestamp: number;
+    sender: "user" | "ai" | "system"; // Adjusted to match the expected type
+};
+
+function ArticleDialog({ open, onClose, article }: ArticleDialogProps) {
     // const { messages, addMessage, clearMessages } = useMessages();
     
-    const [messages, setMessages] = useState([]);
+    const [messages, setMessages] = useState<Message[]>([]);
     const [isAnswering, setIsAnswering] = useState(false);
     const [chatInput, setChatInput] = useState("");
     const bottomRef = useRef<HTMLDivElement | null>(null);
 
     useEffect(() => {
         const fetchMessages = async () => {
-            if (!article.url) {
+            // Check if article exists and has a url property before proceeding
+            if (!article?.url) {
                 setMessages([]); // Clear messages if there's no article URL
                 return;
             }
@@ -52,7 +67,7 @@ function ArticleDialog({ open, onClose, article }) {
                 setMessages([]); // Clear messages if the article has no chatMessages
             }
         };
-
+    
         fetchMessages();
     }, [article, open]);
 
@@ -61,22 +76,24 @@ function ArticleDialog({ open, onClose, article }) {
     //     clearMessages();
     // }, [article, clearMessages]);
 
-    const addMessageToFirestore = async (message) => {
-        const articleRef = doc(db, "articles", encodeURIComponent(article.url));
+    const addMessageToFirestore = async (message: Message) => {
+        // Use optional chaining with a fallback value
+        const articleUrl = article?.url ? encodeURIComponent(article.url) : 'defaultUrl';
+        const articleRef = doc(db, "articles", articleUrl);
         await setDoc(articleRef, {
             chatMessages: arrayUnion(message)
         }, { merge: true });
     };
 
-    const handleSubmit = async (articleText) => {
+    const handleSubmit = async (articleText: string) => {
         if (chatInput.trim() === "") return;
-        const userMessage = {
+        const userMessage: Message = { // Explicitly type userMessage as Message
             id: uuidv4(),
             text: chatInput,
             timestamp: Date.now(),
-            sender: "user",
-            // Removed articleId, using article.url instead
+            sender: "user", // Ensure sender is one of the allowed string literals
         };
+    
         setMessages(prev => [...prev, userMessage]);
         await addMessageToFirestore(userMessage);
         setChatInput("");
@@ -84,12 +101,13 @@ function ArticleDialog({ open, onClose, article }) {
 
         // Call the AI response function
         const aiResponseText = await callOpenAI(chatInput, articleText);
-        const aiMessage = {
-          id: uuidv4(),
-          text: aiResponseText,
-          timestamp: Date.now(),
-          sender: "ai"
+        const aiMessage: Message = { // Explicitly type aiMessage as Message
+            id: uuidv4(),
+            text: aiResponseText,
+            timestamp: Date.now(),
+            sender: "ai" // Explicitly set sender as "ai"
         };
+
         setMessages(prev => [...prev, aiMessage]);
         await addMessageToFirestore(aiMessage);
         setIsAnswering(false);
@@ -126,13 +144,12 @@ function ArticleDialog({ open, onClose, article }) {
     // };
 
     // Add this function inside your ArticleDialog component
-    const callOpenAI = async (input, articleText) => {
+    const callOpenAI = async (input: string, articleText: string) => {
         const response = await fetch("/call_ai", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
             },
-            // Include the article text in the request body
             body: JSON.stringify({ input, articleText }),
         });
     
@@ -164,7 +181,7 @@ function ArticleDialog({ open, onClose, article }) {
                 <div className="flex flex-col w-full overflow-scroll">
                     <div className="flex flex-col items-center justify-center gap-1 p-12 text-center">
                         <div className="font-extrabold text-3xl text-slate-800">
-                            {article.title}
+                            {article?.title}
                         </div>
                         <div className="text-slate-500 font-medium">
                             Powered by GPT-4
@@ -172,7 +189,8 @@ function ArticleDialog({ open, onClose, article }) {
                     </div>
                     <div className="flex flex-col gap-6 w-full">
                         {messages.map((message) => (
-                            <ChatView key={message.id} message={{...message, text: formatTextToHTML(message.text)}} />
+                            // Pass the message object directly without modifying the text property
+                            <ChatView key={message.id} message={message} />
                         ))}
                         {isAnswering ? (
                             <div className="flex justify-center items-center">
@@ -202,7 +220,7 @@ function ArticleDialog({ open, onClose, article }) {
                         variant="ghost"
                         size="icon"
                         className="h-full aspect-square rounded-xl transition-all"
-                        onClick={() => handleSubmit(article.content)}
+                        onClick={() => article && handleSubmit(article.content)}
                     >
                         {isAnswering ? (
                             <StopCircleIcon className="text-slate-600" />

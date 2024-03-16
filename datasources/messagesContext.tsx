@@ -17,11 +17,13 @@ export interface Message {
 interface MessagesContextProps {
   messages: Message[];
   addMessage: (message: Message, op: "new" | "add") => void;
+  clearMessages: () => void; // Add this line
 }
 
 const MessagesContext = createContext<MessagesContextProps>({
   messages: [],
-  addMessage: () => {},
+  addMessage: () => {}, // This is a placeholder function.
+  clearMessages: () => {}, // Add this line to include a placeholder `clearMessages` function.
 });
 
 export const useMessages = () => useContext(MessagesContext);

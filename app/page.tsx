@@ -4,9 +4,10 @@ import ArticlesComponent from "@/components/ui/articles";
 import axios from "axios";
 import { getFunctions, httpsCallable } from "firebase/functions";
 import { initializeApp } from "firebase/app";
-import { firebaseConfig } from "../firebaseConfig.ts"; // Ensure you have this config set up
+import { firebaseConfig } from "../firebaseConfig";
 import { collection, getDocs, addDoc, deleteDoc, getFirestore } from "firebase/firestore";
 import { useCallback } from "react";
+import { ArticleType } from "@/components/ui/articles"; // Import ArticleType
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
@@ -14,7 +15,7 @@ const functions = getFunctions(app);
 const db = getFirestore(app);
 
 function View() {
-  const [articles, setArticles] = useState([]);
+  const [articles, setArticles] = useState<ArticleType[]>([]); // Use ArticleType for articles state
   const [isLoading, setIsLoading] = useState(false);
   const [isEmpty, setIsEmpty] = useState(false);
   const [isFirebaseReady, setIsFirebaseReady] = useState(false);
@@ -28,7 +29,16 @@ function View() {
     try {
       const articlesJsonCol = collection(db, "articlesJson");
       const snapshot = await getDocs(articlesJsonCol);
-      const articlesJsonList = snapshot.docs.map((doc) => doc.data());
+      const articlesJsonList: ArticleType[] = snapshot.docs.map((doc) => ({
+        id: doc.id, // Assuming you want to keep the document ID
+        title: doc.data().title,
+        content: doc.data().content,
+        publish_date: doc.data().publish_date,
+        source: doc.data().source,
+        tags: doc.data().tags,
+        text: doc.data().text,
+        url: doc.data().url,
+      }));
       console.log(articlesJsonList);
 
       console.log("made it to fetcharticlesfromjson");
@@ -246,7 +256,6 @@ function View() {
         </div>
         <ArticlesComponent
           articles={articles}
-          articlesJson={articlesJson}
           isLoading={isLoading}
           isEmpty={isEmpty}
         />
