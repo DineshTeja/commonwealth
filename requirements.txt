@@ -1,0 +1,5 @@
+functions-framework==3.*
+newspaper3k
+openai
+google-cloud-firestore
+Flask

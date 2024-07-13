@@ -1,0 +1,53 @@
+{
+  "name": "commonwealth-ai-supabase",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@deepkit/core": "^1.0.1-alpha.147",
+    "@emotion/react": "^11.11.4",
+    "@emotion/styled": "^11.11.5",
+    "@extractus/article-extractor": "github:extractus/article-extractor",
+    "@mui/lab": "^5.0.0-alpha.172",
+    "@mui/material": "^5.16.1",
+    "@radix-ui/react-slot": "^1.1.0",
+    "@supabase/supabase-js": "^2.43.2",
+    "axios": "^1.7.2",
+    "cheerio": "^1.0.0-rc.12",
+    "class-variance-authority": "^0.7.0",
+    "compromise": "^14.13.0",
+    "convex": "^1.12.0",
+    "lucide-react": "^0.408.0",
+    "newsapi": "^2.4.1",
+    "next": "14.2.3",
+    "node-fetch": "^3.3.2",
+    "pybridge": "^1.4.0",
+    "react": "^18",
+    "react-dom": "^18",
+    "react-masonry-css": "^1.0.16",
+    "react-textarea-autosize": "^8.5.3",
+    "rxjs": "^7.8.1",
+    "tailwindcss-animate": "^1.0.7",
+    "uuid": "^10.0.0"
+  },
+  "devDependencies": {
+    "@deepkit/type-compiler": "^1.0.1-alpha.150",
+    "@supabase/functions-js": "^2.4.2",
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "clsx": "^2.1.1",
+    "eslint": "^8.57.0",
+    "eslint-config-next": "14.2.3",
+    "framer-motion": "^11.2.5",
+    "postcss": "^8",
+    "tailwind-merge": "^2.4.0",
+    "tailwindcss": "^3.4.3",
+    "typescript": "^5.5.3"
+  }
+}
