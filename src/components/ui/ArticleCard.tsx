@@ -84,6 +84,7 @@ const ArticleCard: React.FC<ArticleCardProps> = ({ article }) => {
         onClose={() => setIsDialogOpen(false)}
         article={article}
       />
+      
       <KeyDetailsDialog
         open={isKeyDetailsDialogOpen}
         onClose={() => setIsKeyDetailsDialogOpen(false)}
