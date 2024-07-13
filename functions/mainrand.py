@@ -1,22 +1,23 @@
 from flask import Flask, jsonify, request
 from newspaper import Article
+from GoogleNews import GoogleNews
+import datetime
 import pandas as pd
 import nltk
+from serpapi import GoogleSearch
 import requests
 import json
 # import openai
-# from openai import OpenAI
-import openai
+from openai import OpenAI
 import os
-import argparse
 import requests
-import functions_framework
+# from firebase_functions import firestore_fn, https_fn
 
 # Load your OpenAI API key from an environment variable for security
-openai.api_key = os.getenv('OPENAI_API_KEY')
+# openai.api_key = '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'
 #os.getenv('OPENAI_API_KEY')
 
-# client = OpenAI(api_key='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')
+client = OpenAI(api_key='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')
 
 categories = {
     "Elections and Campaigns": ["election", "campaign", "vote", "ballot"],
@@ -64,24 +65,23 @@ def classify_article(article_text, categories, num_tags=3):
 
     return final_categories
 
-
-@functions_framework.http
+# @https.on_request
 def get_articles(request):
-    request_json = request.get_json(silent=True)
-    if request_json is None:
-        # Handle the case where there is no valid JSON in the request
-        return json.dumps({'error': 'No JSON payload found'}), 400, {'Content-Type': 'application/json'}
+    data = request.get_json()
+    urls = data.get('urls', [])
     
-    urls = request_json.get('urls', [])
-    
+    print(f"Starting to process {len(urls)} articles...")
+
     articles_list = []
     for url in urls:
         try:
             article = Article(url)
             article.download()
             article.parse()
+            # Classify the article
             tags = classify_article(article.text, categories)
             
+            print(f"Processing URL: {url}")
             articles_list.append({
                 'title': article.title,
                 'text': article.text[:300],
@@ -89,61 +89,35 @@ def get_articles(request):
                 'url': url,
                 'publish_date': article.publish_date.isoformat() if article.publish_date else 'Unknown',
                 'source': article.source_url,
-                'tags': tags
+                'tags': tags  # Add classified tags to the article info
             })
         except Exception as e:
             print(f"Failed to process {url}: {str(e)}")
     
-    return json.dumps(articles_list), 200, {'Content-Type': 'application/json'}
+    print(f"Total articles processed: {len(articles_list)}")
+    return jsonify(articles_list)
 
-# @functions_framework.http
-# def call_openai(request):
-#     request_json = request.get_json(silent=True)
-#     user_input = request_json.get('input')
-#     article_text = request_json.get('articleText')
-
-#     if not user_input or not article_text:
-#         return json.dumps({'error': 'No user input or article text provided'}), 400
-
-#     try:
-#         client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
-#         response = client.chat.completions.create(
-#             model="gpt-3.5-turbo",
-#             messages=[
-#                 {"role": "system", "content": f"You are a chatbot that answers the user's questions about the article by analyzing its text and using your knowledge. Here is the article text: {article_text}"},
-#                 {"role": "assistant", "content": article_text},
-#                 {"role": "user", "content": user_input}
-#             ]
-#         )
-
-#         return json.dumps({'response': response.choices[0].message.content.strip()}), 200, {'Content-Type': 'application/json'}
-#     except Exception as e:
-#         return json.dumps({'error': str(e)}), 500
-
-@functions_framework.http
+# @https.on_request
 def call_openai(request):
-    request_json = request.get_json(silent=True)
-    user_input = request_json.get('input', '')
-    article_text = request_json.get('articleText', '')
+    data = request.json
+    user_input = data.get('input')  # User's input
+    article_text = data.get('articleText')  # Article text to be included
 
     if not user_input or not article_text:
-        return json.dumps({'error': 'No user input or article text provided'}), 400
+        return jsonify({'error': 'No user input or article text provided'}), 400
 
     try:
-        # Set the OpenAI API key from an environment variable
-        openai.api_key = os.getenv('OPENAI_API_KEY')
-
-        # Create a chat completion request to OpenAI
-        response = openai.ChatCompletion.create(
+        response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
                 {"role": "system", "content": "You are a chatbot that answers the user's questions about the article by analyzing its text and using your knowledge. Here is the article text: {article_text}"},
-                {"role": "assistant", "content": article_text},
+                {"role": "assistant", "content": article_text},  # Include the article text as part of the assistant's knowledge
                 {"role": "user", "content": user_input}
             ]
         )
 
-        # Extract the response content and return it
-        return json.dumps({'response': response.choices[0].message['content'].strip()}), 200, {'Content-Type': 'application/json'}
+        print(response.choices[0].message.content)
+
+        return jsonify({'response': response.choices[0].message.content.strip()})
     except Exception as e:
-        return json.dumps({'error': str(e)}), 500
+        return jsonify({'error': str(e)}), 500
