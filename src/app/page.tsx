@@ -5,7 +5,7 @@ import ArticlesComponent from "@/components/articles";
 
 export default function Home() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between pt-12 pb-3 px-16 gap-8 bg-gradient-to-b from-purple-100 via-purple-50 to-white">
+    <main className="relative z-10 flex min-h-screen flex-col items-center justify-between pt-12 pb-3 px-8 gap-8">
       <div className="w-full">
         <div className="flex flex-col items-center gap-1 px-12 pt-12 pb-1 w-full">
           <div
@@ -19,7 +19,7 @@ export default function Home() {
             Commonwealth.ai
           </div>
           <div className="text-slate-500 font-normal">
-            an obviously simple political digest.
+            <strong>instantly</strong> transform political media into <strong>structured data</strong>. 
           </div>
         </div>
 

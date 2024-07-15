@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Meteors from "@/components/ui/meteors";
+import Navbar from "@/components/ui/Navbar";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -21,8 +22,15 @@ export default function RootLayout({
         <meta name="viewport" content="width=device-width, initial-scale=0.8"/>
       </head>
       <body className={inter.className}>
-        <Meteors number={200} />
-        {children}
+        <div className="relative min-h-screen flex">
+          <Navbar />
+          <div className="flex-1 ml-64">
+            <Meteors number={200} />
+            <div className="relative z-10">
+              {children}
+            </div>
+          </div>
+        </div>
       </body>
     </html>
   );

@@ -109,12 +109,25 @@ const ArticlesComponent = () => {
     }
   };
 
+  const groupArticlesBySource = (articles) => {
+    return articles.reduce((acc, article) => {
+      const source = article.source || 'Unknown Source';
+      if (!acc[source]) {
+        acc[source] = [];
+      }
+      acc[source].push(article);
+      return acc;
+    }, {});
+  };
+
+  const groupedArticles = groupArticlesBySource(articles);
+
   return (
     <div className="container mx-auto px-4">
       <div className="flex justify-center mb-8">
         <button
           onClick={refreshDatabase}
-          className="mt-4 py-2 px-4 bg-purple-600 text-white rounded-full hover:bg-purple-700 transition duration-300"
+          className="mt-4 text-sm py-1 px-3 bg-purple-600 text-white rounded-full hover:bg-purple-700 transition duration-300"
         >
           Refresh Database
         </button>
@@ -123,9 +136,11 @@ const ArticlesComponent = () => {
         breakpointCols={breakpointColumnsObj}
         spacing={2}
       >
-        {articles.map((article, index) => (
-          <div key={index}>
-            <ArticleCard key={index} article={article}/>
+        {Object.entries(groupedArticles).map(([source, sourceArticles]) => (
+          <div key={source} className="mb-8 relative">
+            {sourceArticles.map((article, index) => (
+              <ArticleCard key={index} article={article} showSource={index===0} />
+            ))}
           </div>
         ))}
       </Masonry>
