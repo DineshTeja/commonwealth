@@ -7,7 +7,7 @@ import RouteGuard from '@/components/RouteGuard';
 import { Card, CardContent } from "@/components/ui/card";
 import { Carousel, CarouselItem, CarouselContent, CarouselPrevious, CarouselNext } from "@/components/ui/carousel";
 
-export default function HomePage() {
+export default function SettingsPage() {
   const { userId } = useAuth();
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
 

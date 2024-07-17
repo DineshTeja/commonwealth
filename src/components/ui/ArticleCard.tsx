@@ -1,8 +1,12 @@
 import Image from 'next/image';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ArticleDialog from './ArticleDialog';
 import { ArticleType } from '@/components/articles';
 import KeyDetailsDialog from './KeyDetailsDialog';
+import supabase from '@/lib/supabaseClient';
+import { useAuth } from '@/hooks/useAuth';
+import { ClipboardDocumentListIcon } from '@heroicons/react/24/outline';
+import AddToListDialog from './AddToListDialog';
 
 const stripHtml = (html: string) => {
     return html.replace(/<[^>]*>/g, '');
@@ -11,37 +15,81 @@ const stripHtml = (html: string) => {
 interface ArticleCardProps {
    article: ArticleType;
    showSource?: boolean;
+   last?: boolean;
 }
   
-
-const ArticleCard: React.FC<ArticleCardProps> = ({ article, showSource = true }) => {
+const ArticleCard: React.FC<ArticleCardProps> = ({ article, showSource = true, last = false, single = false }) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isKeyDetailsDialogOpen, setIsKeyDetailsDialogOpen] = useState(false);
-
-  const formatDate = (dateString: string | undefined) => {
-    if (!dateString) return "Not Given";
-    const date = new Date(dateString);
-    return date.toLocaleDateString();
+  const [lists, setLists] = useState([]);
+  const [selectedList, setSelectedList] = useState('');
+  const [isAddToListOpen, setIsAddToListOpen] = useState(false);
+  const { userId } = useAuth();
+  
+  const fetchLists = async () => {
+    const { data, error } = await supabase.from('lists').select('*');
+    if (error) {
+      console.error('Error fetching lists:', error);
+    } else {
+      setLists(data);
+    }
   };
 
+  const addToList = async () => {
+    if (!selectedList) return;
+    
+    if (!userId) {
+      console.error('User not authenticated');
+      return;
+    }
+  
+    const { data, error } = await supabase
+      .from('list_articles')
+      .insert({ 
+        user_id: userId,
+        list_id: selectedList, 
+        article_id: article.id 
+      });
+  
+    if (error) {
+      console.error('Error adding article to list:', error);
+    } else {
+      console.log('Article added to list successfully');
+      setIsAddToListOpen(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchLists();
+  }, []);
+
   return (
-    <div className="bg-white overflow-hidden">
+    <div className={`bg-white overflow-hidden shadow-[0_5px_5px_0px_rgba(0,0,0,0.05)] ${last ? "rounded-b-2xl" : ""} ${single ? "rounded-2xl" : ""}`}>
+      <AddToListDialog
+        open={isAddToListOpen}
+        onClose={() => setIsAddToListOpen(false)}
+        lists={lists}
+        selectedList={selectedList}
+        setSelectedList={setSelectedList}
+        addToList={addToList}
+      />
+
       {showSource && (
-        <div className="rounded-2xl mb-2 px-4 py-5 text-lg leading-6 font-medium text-white bg-purple-900 bg-opacity-75 border-b border-gray-200">
+        <div className="rounded-t-2xl mb-2 px-4 py-5 text-lg leading-6 font-medium text-white bg-purple-900 bg-opacity-75 border-b border-gray-200">
           {article.source || 'Unknown Source'}
         </div>
       )}
-      <div className="bg-white shadow-lg overflow-hidden rounded-2xl mb-4">
-        <div className="px-4 py-4 sm:px-6 rounded-t-none rounded-b-2xl">
+      <div className={`bg-white overflow-hidden mb-4`}>
+        <div className="px-4 py-4 sm:px-6 rounded-t-none">
           <h3 className="text-md font-semibold text-gray-800 mb-2">
             {article.title}
           </h3>
           <p className="text-sm text-gray-600 mb-4">
               {stripHtml(article.content).substring(0, 150)}...
           </p>
-          {article.publish_date && (
+          {article.published && (
             <p className="text-sm text-black font-medium mb-2">
-              Published on: {formatDate(article.publish_date)}
+              Published on: {new Date(article.published).toLocaleDateString()}
             </p>
           )}
           <div className="flex flex-wrap gap-2 mb-4">
@@ -82,6 +130,13 @@ const ArticleCard: React.FC<ArticleCardProps> = ({ article, showSource = true })
                   </button>
               </div>
           </div>
+          <button 
+              className="text-white bg-purple-900 hover:bg-purple-700 font-medium px-3 py-2 rounded-xl flex items-center justify-center transition duration-300 w-full mt-4"
+              onClick={() => setIsAddToListOpen(true)}
+              >
+              <ClipboardDocumentListIcon className="w-4 h-4 mr-2" />
+              Add to List
+          </button>
         </div>
       </div>
       <ArticleDialog
