@@ -13,7 +13,7 @@
     "@deepkit/core": "^1.0.1-alpha.147",
     "@emotion/react": "^11.11.4",
     "@emotion/styled": "^11.11.5",
-    "@extractus/article-extractor": "github:extractus/article-extractor",
+    "@extractus/article-extractor": "github:extractus/article-extractor#4f0e78d51a405fd33968a6fa6f9e90243e3a1d82",
     "@heroicons/react": "^2.1.5",
     "@mui/lab": "^5.0.0-alpha.172",
     "@mui/material": "^5.16.1",
