@@ -6,6 +6,8 @@ import ArticleCard from '@/components/ui/ArticleCard';
 import { Command, CommandInput, CommandList, CommandItem, CommandGroup } from '@/components/ui/command';
 import { Button } from '@/components/ui/button';
 import LoadingSpinner from '@/components/ui/LoadingState';
+import ListSelectionDropdown from "@/components/ui/ListSelectionDropdown";
+import { ArrowPathIcon } from "@heroicons/react/24/outline";
 
 export interface ArticleType {
   title: string;
@@ -24,7 +26,7 @@ export interface ArticleType {
   };
 }
 
-const ArticlesComponent = () => {
+const ArticlesComponent = ({ userId }: { userId: string }) => {
   const [articles, setArticles] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
@@ -37,6 +39,9 @@ const ArticlesComponent = () => {
     "I want to read about immigration debates"
   ]);
   const [searchLoading, setSearchLoading] = useState(false);
+  const [selectedArticles, setSelectedArticles] = useState<string[]>([]);
+  const [selectedList, setSelectedList] = useState('');
+  const [lists, setLists] = useState([]);
 
   const refreshDatabase = async () => {
     try {
@@ -122,14 +127,45 @@ const ArticlesComponent = () => {
     console.log("GROUPED ARTICLES", groupedArticles)
   }, [groupedArticles]);
 
+  const handleArticleSelect = (articleId: string) => {
+    setSelectedArticles(prev => 
+      prev.includes(articleId) 
+        ? prev.filter(id => id !== articleId) 
+        : [...prev, articleId]
+    );
+  };
+
+  const handleAddToList = async () => {
+    if (!selectedList || selectedArticles.length === 0) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('list_articles')
+        .insert(selectedArticles.map(articleId => ({
+          user_id: userId,
+          list_id: selectedList,
+          article_id: articleId
+        })));
+
+      if (error) throw error;
+
+      console.log('Articles added to list successfully');
+      setSelectedArticles([]);
+      setSelectedList('');
+    } catch (error) {
+      console.error('Error adding articles to list:', error);
+    }
+  };
+
   return (
     <div className="flex flex-col items-center justify-center container mx-auto px-4">
-      <div className="text-sm p-2 flex justify-center mt-2 mb-4">
-        <Button size="xs" className="bg-purple-900 hover:bg-purple-800 py-1 px-3 rounded-2xl" onClick={refreshDatabase}>
-          Refresh Database
+      <div className="flex justify-between items-center mb-8 w-[100%]">
+        <Button 
+          onClick={refreshDatabase} 
+          className="bg-purple-800 text-white px-4 py-2 rounded-xl mx-3"
+        >
+           <ArrowPathIcon className="w-4 h-4" />
         </Button>
-      </div>
-      <div className="flex justify-center mb-8 w-[80%]">
         <Command className="shadow-md border border-gray-200 rounded-xl">
           <CommandInput
             placeholder="Search articles..."
@@ -146,7 +182,7 @@ const ArticlesComponent = () => {
             }}
           />
           {showSuggestions ? (
-            <CommandList>
+            <CommandList className="w-full mt-1 bg-white shadow-lg rounded-xl">
               <CommandGroup heading="Suggestions">
                 {suggestions.map((suggestion, index) => (
                   <CommandItem key={index} onSelect={() => setSearchQuery(suggestion)}>
@@ -157,6 +193,13 @@ const ArticlesComponent = () => {
             </CommandList>
           ) : null}
         </Command>
+        <ListSelectionDropdown
+          selectedList={selectedList}
+          setSelectedList={setSelectedList}
+          onAddToList={handleAddToList}
+          selectedArticlesCount={selectedArticles.length}
+          userId={userId}
+        />
       </div>
       <Masonry
         breakpointCols={breakpointColumnsObj}
@@ -171,6 +214,8 @@ const ArticlesComponent = () => {
                 article={article} 
                 showSource={true} 
                 single={true}
+                isSelected={selectedArticles.includes(article.id)}
+                onSelect={() => handleArticleSelect(article.id)}
               />
             ))
           ) : searchLoading ? (
@@ -179,17 +224,29 @@ const ArticlesComponent = () => {
             <div>No results found</div>
           )
         ) : (
-          Object.entries(groupedArticles).map(([source, sourceArticles]) => (
-            <div key={source} className="mb-8 relative rounded-2xl">
-              {sourceArticles.map((article, index) => (
-                <ArticleCard 
-                  last={index === sourceArticles.length - 1} 
-                  key={article.id || index} 
-                  article={article} 
-                  showSource={index === 0} 
-                />
-              ))}
-            </div>
+          // Object.entries(groupedArticles).map(([source, sourceArticles]) => (
+          //   <div key={source} className="mb-8 relative rounded-2xl">
+          //     {sourceArticles.map((article, index) => (
+          //       <ArticleCard 
+          //         last={index === sourceArticles.length - 1} 
+          //         key={article.id || index} 
+          //         article={article} 
+          //         showSource={index === 0} 
+          //         isSelected={selectedArticles.includes(article.id)}
+          //         onSelect={() => handleArticleSelect(article.id)}
+          //       />
+          //     ))}
+          //   </div>
+          // ))
+          articles.map((article, index) => (
+            <ArticleCard 
+              key={article.id || index} 
+              article={article} 
+              showSource={true} 
+              single={true}
+              onSelect={handleArticleSelect}
+              isSelected={selectedArticles.includes(article.id)}
+            />
           ))
         )}
       </Masonry>

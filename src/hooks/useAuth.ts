@@ -12,8 +12,10 @@ export function useAuth() {
       if (error) {
         console.error('Error fetching user session:', error);
         setUserId(null);
+        setUserEmail(null);
       } else {
         setUserId(data.session?.user.id ?? null);
+        setUserEmail(data.session?.user.email ?? null);
       }
     };
 
@@ -23,21 +25,6 @@ export function useAuth() {
   const setSession = (userId: string | null) => {
     setUserId(userId);
   };
-
-  useEffect(() => {
-    const fetchUserInfo = async () => {
-      if (userId) {
-        const { data, error } = await supabase
-        .from('users')
-        .select('email')
-        .eq('id', userId)
-        .single();
-        setUserEmail(data?.email);
-      }
-    };
-
-    fetchUserInfo();
-  }, [userId]);
 
 
   return { userId, setSession, userEmail };

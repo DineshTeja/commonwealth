@@ -26,7 +26,7 @@ const options = {
     safe: 'off',
     filter: 1,
     start: null,
-    num: 10
+    num: 50
   },
   headers: {
     'x-api-key': 'cd1b6b80-97c5-4978-9de2-4d3fc5a910b8',

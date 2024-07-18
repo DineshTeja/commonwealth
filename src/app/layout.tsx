@@ -22,11 +22,11 @@ export default function RootLayout({
         <meta name="viewport" content="width=device-width, initial-scale=0.8"/>
       </head>
       <body className={inter.className}>
-        <div className="relative min-h-screen flex">
+        <div className="relative min-h-screen flex max-w-screen">
           <Navbar />
-          <div className="flex-1 ml-64">
+          <div className="flex-1">
             <Meteors number={200} />
-            <div className="relative z-10">
+            <div className="relative">
               {children}
             </div>
           </div>

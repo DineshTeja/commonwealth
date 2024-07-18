@@ -46,43 +46,43 @@ export type Article = {
   tags: string[]
 }
 
-export const columns: ColumnDef<Article>[] = [
-  {
-    accessorKey: "title",
-    header: "Title",
-  },
-  {
-    accessorKey: "source",
-    header: "Source",
-  },
-  {
-    accessorKey: "key_details.description",
-    header: "Description",
-  },
-  {
-    accessorKey: "url",
-    header: "URL",
-  },
-  {
-    accessorKey: "key_details.citation",
-    header: "Citation",
-  },
-  {
-    accessorKey: "key_details.keyMentions",
-    header: "Key Mentions",
-  },
-  {
-    accessorKey: "key_details.bombshellClaims",
-    header: "Bombshell Claims",
-  },
-]
-
 const ListContents = ({ listId, userId }) => {
   const [articles, setArticles] = useState<Article[]>([]);
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = useState({})
+
+  const columns: ColumnDef<Article>[] = [
+    {
+      accessorKey: "title",
+      header: "Title",
+    },
+    {
+      accessorKey: "source",
+      header: "Source",
+    },
+    {
+      accessorKey: "key_details.description",
+      header: "Description",
+    },
+    {
+      accessorKey: "url",
+      header: "URL",
+    },
+    {
+      accessorKey: "key_details.citation",
+      header: "Citation",
+    },
+    {
+      accessorKey: "key_details.keyMentions",
+      header: "Key Mentions",
+    },
+    {
+      accessorKey: "key_details.bombshellClaims",
+      header: "Bombshell Claims",
+    },
+  ]
 
   useEffect(() => {
     fetchListArticles();

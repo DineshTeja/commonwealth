@@ -60,15 +60,15 @@ const ListManager = (userId: string) => {
   }, [lists]);
 
   return (
-    <div className="flex flex-col items-center">
-      <div className="flex flex-col items-center mb-4">
-        <div className="flex items-center space-x-2 mt-5 mb-4 w-full">
+    <div className="flex flex-col items-start">
+      <div className="flex flex-col items-start mb-4">
+        <div className="flex items-start space-x-2 mt-5 mb-4 w-full">
             <Input
-            type="text"
-            value={newListName}
-            onChange={(e) => setNewListName(e.target.value)}
-            placeholder="Enter a list name"
-            className="w-96"
+              type="text"
+              value={newListName}
+              onChange={(e) => setNewListName(e.target.value)}
+              placeholder="Enter a list name"
+              className="w-[500px] shadow-lg"
             />
             <Button className="bg-purple-900 hover:bg-purple-700" onClick={createList}>
             Create List

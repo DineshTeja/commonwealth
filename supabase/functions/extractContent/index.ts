@@ -22,6 +22,27 @@ Deno.serve(async (req) => {
     Deno.env.get('SUPABASE_ANON_KEY') ?? ''
   );
 
+  function validateType(value, type) {
+    switch (type) {
+      case 'string':
+        return typeof value === 'string' ? value : '';
+      case 'boolean':
+        return typeof value === 'boolean' ? value : false;
+      case 'number':
+        return typeof value === 'number' ? value : 0;
+      case 'date':
+        return new Date(value).toString() !== 'Invalid Date' ? new Date(value).toISOString() : new Date().toISOString();
+      case 'jsonb':
+        try {
+          return typeof value === 'object' ? value : JSON.parse(value);
+        } catch {
+          return {};
+        }
+      default:
+        return value;
+    }
+  }
+
   try {
     // Fetch article IDs from the list_articles table
     const { data: listArticles, error: listArticlesError } = await supabase
@@ -54,7 +75,7 @@ Deno.serve(async (req) => {
     for (const article of articles) {
       const prompt = `
         Extract the following variables from the article content:
-        Variables: ${tags.join(', ')}
+        Variables: ${tags.map(tag => `[Name: ${tag.name}, Type: ${tag.type}, Structure: ${tag.structure}]`).join('; ')}
         Article Content: ${article.content}
         Respond with a JSON object containing the extracted variables.
       `;
@@ -73,8 +94,23 @@ Deno.serve(async (req) => {
         extractedContent = extractedContent.replace(/^```json\n/, '').replace(/\n```$/, '');
       }
 
-      const extractedData = JSON.parse(extractedContent);
-      results.push({ articleId: article.id, extractedData });
+      let extractedData = JSON.parse(extractedContent);
+
+      extractedData = tags.reduce((acc, tag) => {
+        const value = extractedData[tag.name];
+        if (tag.structure === 'array') {
+          if (Array.isArray(value)) {
+            acc[tag.name] = value.map(item => validateType(item, tag.type));
+          } else {
+            acc[tag.name] = [];
+          }
+        } else {
+          acc[tag.name] = validateType(value, tag.type);
+        }
+        return acc;
+      }, {});
+
+      results.push({ title: article.title, content: article.content, url: article.url, source: article.source, key_details: article.key_details, author: article.author, published: article.published, extractedData });
     }
 
     return new Response(JSON.stringify({ results }), {

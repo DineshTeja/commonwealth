@@ -22,7 +22,8 @@ Deno.serve(async (req) => {
   const prompt = `
     Extract the variables requested in the following natural language query:
     "${body.query}"
-    Respond with an array of variables.
+    Respond with an array of objects in the format {name: ___, type: ____, structure: ____} where name is a string, type can be "string" | "boolean" | "number" | "date" | "jsonb" and structure can be "single" | "array".
+    Infer the type and structure of each variable based on the query.
   `;
 
   try {
@@ -40,7 +41,19 @@ Deno.serve(async (req) => {
       variablesString = variablesString.replace(/^```json\n/, '').replace(/\n```$/, '');
     }
 
-    const variables = JSON.parse(variablesString);
+    console.log(variablesString);
+    variablesString = variablesString.replace(/(\w+):/g, '"$1":');
+    let variables = JSON.parse(variablesString);
+
+    variables = variables
+      .filter(variable => variable.name) 
+      .map(variable => ({
+        name: variable.name,
+        type: variable.type || 'string', 
+        structure: variable.structure || 'single' 
+      }));
+
+    console.log(variables);
 
     return new Response(JSON.stringify({ variables }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
