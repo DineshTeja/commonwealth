@@ -21,15 +21,17 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ClockIcon } from "lucide-react";
 import { CheckCircleIcon } from '@heroicons/react/24/solid';
+import { ListType } from '@/components/ui/ListManager';
+import { Database } from '@/lib/database.types';
 
 const ExtractionForm = ({ userId }: { userId: string }) => {
   const [inputText, setInputText] = useState('');
-  const [lists, setLists] = useState([]);
+  const [lists, setLists] = useState<ListType[]>([]);
   const [selectedList, setSelectedList] = useState('');
   const [variables, setVariables] = useState<Array<{name: string, type: "string" | "boolean" | "number" | "date" | "jsonb", structure: "single" | "array"}>>([{name: "", type: "string", structure: "single"}]);
-  const [extractedContent, setExtractedContent] = useState(null);
+  const [extractedContent, setExtractedContent] = useState<any>(null);
   const [loadingContent, setLoadingContent] = useState(false);
-  const [extractions, setExtractions] = useState([]);
+  const [extractions, setExtractions] = useState<Database['public']['Tables']['extractions']['Row'][]>([]);
   const [generatedVariables, setGeneratedVariables] = useState(false);
   const [manualAddVariable, setManualAddVariable] = useState(false);
   
@@ -117,11 +119,14 @@ const ExtractionForm = ({ userId }: { userId: string }) => {
     }
   };
 
-  const handleVariableChange = (index: number, change: "name" | "type" | "structure", value: string) => {
+  const handleVariableChange = (index: number, change: keyof typeof variables[0], value: string) => {
     setVariables((prevVariables) => {
-      const updatedVariables = [...prevVariables];
-      updatedVariables[index][change] = value;
-      return updatedVariables;
+      return prevVariables.map((variable, i) => {
+        if (i === index) {
+          return { ...variable, [change]: value };
+        }
+        return variable;
+      });
     });
   };
 
@@ -139,9 +144,9 @@ const ExtractionForm = ({ userId }: { userId: string }) => {
     if (error) {
       console.error('Error fetching extraction:', error);
     } else {
-      setInputText(data.inputText);
-      setSelectedList(data.list_id);
-      setVariables(JSON.parse(data.variables));
+      setInputText(data.inputText ?? '');
+      setSelectedList(data.list_id ?? '');
+      setVariables(typeof data.variables === 'string' ? JSON.parse(data.variables) : []);
       setExtractedContent(data.extractedContent);
     }
   };
@@ -161,18 +166,18 @@ const ExtractionForm = ({ userId }: { userId: string }) => {
                 extractions.map(extraction => (
                   <DropdownMenuRadioItem key={extraction.id} value={extraction.id} onClick={() => handleExtractionSelect(extraction.id)} className="flex justify-between items-center">
                     <div className="flex flex-col mt-1">
-                      <span className="text-left">{extraction.inputText.substring(0, 40)}...</span>
+                      <span className="text-left">{extraction.inputText?.substring(0, 40) ?? ''}...</span>
                       <div className="flex flex-wrap gap-1 mt-1">
-                        {JSON.parse(extraction.variables).map((variable, index) => (
-                          <Badge key={index} variant="outline">{variable.name}</Badge>
-                        ))}
+                      {(typeof extraction.variables === 'string' ? JSON.parse(extraction.variables) : []).map((variable: any, index: number) => (
+                        <Badge key={index} variant="outline">{variable.name}</Badge>
+                      ))}
                       </div>
                     </div>
                     <p className="text-sm text-muted-foreground text-right">{new Date(extraction.created_at).toLocaleDateString()}</p>
                   </DropdownMenuRadioItem>
                 ))
               ) : (
-                <DropdownMenuRadioItem disabled>No previous extractions</DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="none" disabled>No previous extractions</DropdownMenuRadioItem>
               )}
             </DropdownMenuRadioGroup>
           </DropdownMenuContent>
@@ -324,8 +329,8 @@ const ExtractionForm = ({ userId }: { userId: string }) => {
               <div className="mt-4 w-full">
                 <Label className="mb-3 text-base" htmlFor="message-2">Extracted Content</Label>
                 <pre className="bg-gray-100 p-4 mt-2 rounded-lg overflow-auto whitespace-pre-wrap break-words">
-                  {JSON.stringify(
-                    extractedContent.map(article => ({
+                {JSON.stringify(
+                    extractedContent.map((article: { content: string }) => ({
                       ...article,
                       content: article.content.length > 100 ? article.content.substring(0, 100) + '...' : article.content
                     })),

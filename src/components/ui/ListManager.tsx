@@ -3,14 +3,20 @@ import supabase from '@/lib/supabaseClient';
 import ListContents from '@/components/ListContents';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import Overview from "@/components/ui/Overview";
 
-const ListManager = (userId: string) => {
-  const [lists, setLists] = useState([]);
+export type ListType = {
+  created_at: string;
+  id: string;
+  name: string | null;
+  updated_at: string | null;
+  user_id: string | null;
+} 
+
+const ListManager = ({ userId }: { userId: string }) => {
+  const [lists, setLists] = useState<ListType[]>([]);
   const [newListName, setNewListName] = useState('');
-  const [selectedList, setSelectedList] = useState('');
 
   useEffect(() => {
     fetchLists();
@@ -26,7 +32,7 @@ const ListManager = (userId: string) => {
     const { data, error } = await supabase
       .from('lists')
       .select('*')
-      .eq('user_id', userId.userId);
+      .eq('user_id', userId);
 
     console.log(data);
 
@@ -34,18 +40,15 @@ const ListManager = (userId: string) => {
       console.error('Error fetching lists:', error);
     } else {
       setLists(data);
-      if (data && data.length > 0) {
-        setSelectedList(data[0].id);
-      }
     }
   };
 
   const createList = async () => {
     if (!newListName.trim() || !userId) return;
 
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from('lists')
-      .insert({ name: newListName, user_id: userId.userId });
+      .insert({ name: newListName, user_id: userId });
 
     if (error) {
       console.error('Error creating list:', error);

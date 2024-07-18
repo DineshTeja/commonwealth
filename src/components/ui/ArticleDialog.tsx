@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
+import { Dialog, DialogContent, DialogActions } from '@mui/material';
 import ReactTextareaAutosize from "react-textarea-autosize";
 import { ChevronRightIcon, StopCircleIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -7,12 +7,12 @@ import { v4 as uuidv4 } from "uuid";
 import ChatView from "@/components/ui/chatView";
 import Image from "next/image";
 import supabase from '@/lib/supabaseClient';
-import { ArticleType } from '@/components/articles';
+import { Database } from '@/lib/database.types';
 
 interface ArticleDialogProps {
   open: boolean;
   onClose: () => void;
-  article: ArticleType;
+  article: Database['public']['Tables']['articles']['Row'];
 }
 
 type Message = {

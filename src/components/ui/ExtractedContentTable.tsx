@@ -14,12 +14,12 @@ import { Input } from "@/components/ui/input";
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { ChevronDown } from "lucide-react";
 
-const truncateToThreeSentences = (text) => {
+const truncateToThreeSentences = (text: string) => {
     const sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
     return sentences.length > 3 ? sentences.slice(0, 3).join(' ') + '...' : text;
   };
 
-const ExtractedContentTable = ({ extractedContent }) => {
+const ExtractedContentTable = ({ extractedContent }: { extractedContent: any }) => {
   const columns = useMemo<ColumnDef<any>[]>(
     () => [
       {

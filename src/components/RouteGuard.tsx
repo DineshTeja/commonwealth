@@ -1,9 +1,6 @@
 "use client";
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 
-function RouteGuard({ userId, children }) {
-  const router = useRouter();
+function RouteGuard({ userId, children }: { userId: string, children: React.ReactNode }) {
 
   if (!userId) {
     return (

@@ -1,19 +1,16 @@
 import Image from 'next/image';
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import ArticleDialog from './ArticleDialog';
-import { ArticleType } from '@/components/articles';
 import KeyDetailsDialog from './KeyDetailsDialog';
-import supabase from '@/lib/supabaseClient';
-import { useAuth } from '@/hooks/useAuth';
-import { ClipboardDocumentListIcon } from '@heroicons/react/24/outline';
 import { CheckCircleIcon } from '@heroicons/react/24/solid';
+import { Database } from '@/lib/database.types';
 
 const stripHtml = (html: string) => {
     return html.replace(/<[^>]*>/g, '');
 };
 
 interface ArticleCardProps {
-   article: ArticleType;
+   article: Database['public']['Tables']['articles']['Row'];
    showSource?: boolean;
    last?: boolean;
    single?: boolean;
@@ -24,45 +21,6 @@ interface ArticleCardProps {
 const ArticleCard: React.FC<ArticleCardProps> = ({ article, showSource = true, last = false, single = false, onSelect, isSelected = false }) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isKeyDetailsDialogOpen, setIsKeyDetailsDialogOpen] = useState(false);
-  const [lists, setLists] = useState([]);
-  const [selectedList, setSelectedList] = useState('');
-  const { userId } = useAuth();
-  
-  const fetchLists = async () => {
-    const { data, error } = await supabase.from('lists').select('*');
-    if (error) {
-      console.error('Error fetching lists:', error);
-    } else {
-      setLists(data);
-    }
-  };
-
-  const addToList = async () => {
-    if (!selectedList) return;
-    
-    if (!userId) {
-      console.error('User not authenticated');
-      return;
-    }
-  
-    const { data, error } = await supabase
-      .from('list_articles')
-      .insert({ 
-        user_id: userId,
-        list_id: selectedList, 
-        article_id: article.id 
-      });
-  
-    if (error) {
-      console.error('Error adding article to list:', error);
-    } else {
-      console.log('Article added to list successfully');
-    }
-  };
-
-  useEffect(() => {
-    fetchLists();
-  }, []);
 
   return (
     <div className={`bg-white overflow-hidden shadow-[0_5px_5px_0px_rgba(0,0,0,0.05)] ${last ? "rounded-b-2xl" : ""} ${single ? "rounded-2xl" : ""} relative`}>
@@ -87,23 +45,23 @@ const ArticleCard: React.FC<ArticleCardProps> = ({ article, showSource = true, l
             {article.title}
           </h3>
           <p className="text-xs text-gray-600 mb-3">
-              {stripHtml(article.content).substring(0, 150)}...
+              {stripHtml(article.content ?? '').substring(0, 150)}...
           </p>
           {article.published && (
             <p className="text-xs text-black font-medium mb-1.5">
               <strong>Published on:</strong> {new Date(article.published).toLocaleDateString()}
             </p>
           )}
-          <div className="flex flex-wrap gap-1.5 mb-3">
+          {/* <div className="flex flex-wrap gap-1.5 mb-3">
             {article.tags && article.tags.map((tag, index) => (
               <span key={index} className="bg-gray-200 px-2.5 py-1 rounded-full font-medium text-xs text-gray-800">
                 {tag}
               </span>
             ))}
-          </div>
+          </div> */}
           <div className="flex flex-col sm:flex-row sm:justify-between items-center w-full">
               <a
-                  href={article.url}
+                  href={article.url ?? ''}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-purple-900 hover:text-purple-700 font-medium mb-1.5 sm:mb-0 text-sm"
