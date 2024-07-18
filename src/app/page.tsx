@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 import Navbar from '@/components/ui/Navbar';
 import { useAuth } from '@/hooks/useAuth';
 import Link from 'next/link';
-import RouteGuard from '@/components/RouteGuard';
 import { Card, CardContent } from "@/components/ui/card";
 import { Carousel, CarouselItem, CarouselContent, CarouselPrevious, CarouselNext } from "@/components/ui/carousel";
 import { Button } from "@/components/ui/button"
@@ -31,7 +30,6 @@ export default function HomePage() {
   }, [])
 
   return (
-    <RouteGuard userId={userId}>
       <div className="min-h-screen text-white flex flex-col items-center">
         <Navbar />
         <header className="w-full max-w-[70%] flex items-center justify-between p-6">
@@ -88,7 +86,6 @@ export default function HomePage() {
         </section>
       </main>
     </div>
-    </RouteGuard>
   );
 }
 
