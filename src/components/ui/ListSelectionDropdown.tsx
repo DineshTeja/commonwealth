@@ -11,6 +11,11 @@ interface ListSelectionDropdownProps {
   userId: string;
 }
 
+interface ListItem {
+  id: string;
+  name: string;
+}
+
 export default function ListSelectionDropdown({ 
   selectedList, 
   setSelectedList, 
@@ -33,17 +38,21 @@ export default function ListSelectionDropdown({
 
         const { data, error } = await supabase
             .from('lists')
-            .select('*')
+            .select('id, name')
             .eq('user_id', userId);
 
         console.log(data);
 
         if (error) {
-            console.error('Error fetching lists:', error);
-        } else {
-            setLists(data);
-            if (data && data.length > 0) {
-            setSelectedList(data[0].id);
+          console.error('Error fetching lists:', error);
+        } else if (data) { 
+            const formattedData: ListItem[] = data.map((item: any) => ({
+                id: item.id,
+                name: item.name,
+            }));
+            setLists(formattedData);
+            if (formattedData) {
+                setSelectedList(formattedData[0]?.id ?? '');
             }
         }
         };

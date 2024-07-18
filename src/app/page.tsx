@@ -1,34 +1,13 @@
 "use client";
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import Navbar from '@/components/ui/Navbar';
-import { useAuth } from '@/hooks/useAuth';
 import Link from 'next/link';
-import { Card, CardContent } from "@/components/ui/card";
-import { Carousel, CarouselItem, CarouselContent, CarouselPrevious, CarouselNext } from "@/components/ui/carousel";
+import { Carousel, CarouselItem } from "@/components/ui/carousel";
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import Image from 'next/image';
 
 export default function HomePage() {
-  const { userId } = useAuth();
-  const [selectedOption, setSelectedOption] = useState<string | null>(null);
-
-  const handleSelect = (option: string) => {
-    setSelectedOption(option);
-  };
-
-  const [isVisible, setIsVisible] = useState(false)
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollPosition = window.pageYOffset
-      setIsVisible(scrollPosition > 300)
-    }
-    window.addEventListener("scroll", handleScroll)
-    return () => {
-      window.removeEventListener("scroll", handleScroll)
-    }
-  }, [])
-
   return (
       <div className="min-h-screen text-white flex flex-col items-center">
         <Navbar />
@@ -76,7 +55,7 @@ export default function HomePage() {
                 <Image src="/images/dashboard3.png" alt="Dashboard preview 3" width={1000} height={500} className="rounded-lg shadow-lg"/>
               </div>
             </CarouselItem>
-            <CarouselItem index={1} className="transform rotate-[0deg] z-20">
+            <CarouselItem className="transform rotate-[0deg] z-20">
               <Image src="/images/dashboard2.png" alt="Dashboard preview 2" width={1000} height={500} className="rounded-lg shadow-lg"/>
             </CarouselItem>
             {/* </CarouselContent> */}
@@ -87,44 +66,4 @@ export default function HomePage() {
       </main>
     </div>
   );
-}
-
-function HeartPulseIcon(props) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
-      <path d="M3.22 12H9.5l.5-1 2 4.5 2-7 1.5 3.5h5.27" />
-    </svg>
-  )
-}
-
-function XIcon(props) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M18 6 6 18" />
-      <path d="m6 6 12 12" />
-    </svg>
-  )
 }

@@ -13,17 +13,12 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table"
-import { ArrowUpDown, ChevronDown, MoreHorizontal } from "lucide-react"
-
+import { ChevronDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Checkbox } from "@/components/ui/checkbox"
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
@@ -36,7 +31,6 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import supabase from '@/lib/supabaseClient';
-import { useAuth } from '@/hooks/useAuth';
 
 export type Article = {
   id: string
@@ -46,7 +40,7 @@ export type Article = {
   tags: string[]
 }
 
-const ListContents = ({ listId, userId }) => {
+const ListContents = ({ listId, userId }: { listId: string, userId: string }) => {
   const [articles, setArticles] = useState<Article[]>([]);
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
@@ -99,7 +93,7 @@ const ListContents = ({ listId, userId }) => {
       .from('list_articles')
       .select('article_id')
       .eq('list_id', listId)
-      .eq('user_id', userId.userId);
+      .eq('user_id', userId);
 
     if (listArticlesError) {
       console.error('Error fetching list articles:', listArticlesError);
@@ -117,7 +111,7 @@ const ListContents = ({ listId, userId }) => {
     if (articlesError) {
       console.error('Error fetching articles:', articlesError);
     } else {
-      setArticles(articlesData);
+      setArticles(articlesData as any);
     }
   };
 
@@ -132,7 +126,7 @@ const ListContents = ({ listId, userId }) => {
       .from('list_articles')
       .delete()
       .eq('list_id', listId)
-      .eq('user_id', userId.userId);
+      .eq('user_id', userId);
 
     if (listArticlesError) {
       console.error('Error deleting list articles:', listArticlesError);
@@ -144,7 +138,7 @@ const ListContents = ({ listId, userId }) => {
       .from('lists')
       .delete()
       .eq('id', listId)
-      .eq('user_id', userId.userId);
+      .eq('user_id', userId);
 
     if (listError) {
       console.error('Error deleting list:', listError);

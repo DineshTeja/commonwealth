@@ -9,7 +9,7 @@ import LoginDialog from './LoginDialog';
 import { useAuth } from '@/hooks/useAuth';
 import supabase from '@/lib/supabaseClient';
 import Image from 'next/image';
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { ChevronRight, ChevronLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -53,7 +53,6 @@ const Navbar = () => {
             alt="Commonwealth"
             width={50}
             height={50}
-            href="/"
           />
         </Link>
         {!isCollapsed && (
@@ -72,7 +71,7 @@ const Navbar = () => {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   whileHover={{ scale: 1.05 }}
-                  transition={isActive && { type: 'spring', stiffness: 500, damping: 30 }}
+                  transition={isActive ? { type: 'spring', stiffness: 500, damping: 30 } : {}}
                 >
                   <item.icon className="mr-2 h-5 w-5" />
                   {item.label}
@@ -93,7 +92,7 @@ const Navbar = () => {
       <div className="mt-auto pt-4">
         <Avatar className="mx-auto mb-2">
           <AvatarFallback className="text-purple-900 bg-purple-200">
-            {userEmail ? userEmail[0].toUpperCase() : 'NA'}
+            {userEmail ? userEmail[0]?.toUpperCase() : 'NA'}
           </AvatarFallback>
         </Avatar>
         {!isCollapsed && (

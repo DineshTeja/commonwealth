@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
+import { Dialog, DialogTitle, DialogContent } from '@mui/material';
 import { Button } from "@/components/ui/button";
 import supabase from '@/lib/supabaseClient';
 import { useAuth } from '@/hooks/useAuth';

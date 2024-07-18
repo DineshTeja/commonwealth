@@ -8,12 +8,12 @@ import ListManager from '@/components/ui/ListManager';
 const ListsPage = () => {
   const { userId } = useAuth();
   return (
-    <RouteGuard userId={userId}>
+    <RouteGuard userId={userId ?? ''}>
       <div className="flex w-auto">
         <Navbar />
         <main className="flex flex-col items-center justify-center flex-1 pt-12 pb-3 px-8 gap-8">
           <div className="w-[70%]">
-            <ListManager userId={userId}/>
+            {userId && <ListManager userId={userId}/>}
           </div>
         </main>
       </div>

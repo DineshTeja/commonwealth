@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
+import { Dialog, DialogContent, DialogActions } from '@mui/material';
 import supabase from '@/lib/supabaseClient';
-import { ArticleType } from '@/components/articles';
+import { Database } from '@/lib/database.types';
 import Image from "next/image";
 
 interface KeyDetailsDialogProps {
   open: boolean;
   onClose: () => void;
-  article: ArticleType;
+  article: Database['public']['Tables']['articles']['Row'];
 }
 
 interface KeyDetails {
@@ -18,6 +18,18 @@ interface KeyDetails {
   description: string;
   citation: string;
 }
+
+const isKeyDetails = (obj: any): obj is KeyDetails => {
+  return (
+    typeof obj === 'object' &&
+    'sentiment' in obj &&
+    'keyMentions' in obj &&
+    'bombshellClaims' in obj &&
+    'keyStatistics' in obj &&
+    'description' in obj &&
+    'citation' in obj
+  );
+};
 
 function KeyDetailsDialog({ open, onClose, article }: KeyDetailsDialogProps) {
   const [keyDetails, setKeyDetails] = useState<KeyDetails | null>(null);
@@ -35,7 +47,7 @@ function KeyDetailsDialog({ open, onClose, article }: KeyDetailsDialogProps) {
       const { data, error } = await supabase
         .from('articles')
         .select('key_details')
-        .eq('url', article.url)
+        .eq('url', article.url ?? '')
         .limit(1)
         .single();
   
@@ -50,7 +62,12 @@ function KeyDetailsDialog({ open, onClose, article }: KeyDetailsDialogProps) {
   
         setKeyDetails(keyDetailsData.keyDetails);
       } else {
-        setKeyDetails(data.key_details);
+        if (isKeyDetails(data.key_details)) {
+          setKeyDetails(data.key_details);
+        } else {
+          console.error("Invalid key_details format");
+          setKeyDetails(null);
+        }      
       }
     } catch (error) {
       console.error("Error fetching or generating key details:", error);

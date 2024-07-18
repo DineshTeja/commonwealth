@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import supabase from '@/lib/supabaseClient';
-import { v4 as uuidv4 } from 'uuid';
 import Masonry from "@mui/lab/Masonry";
 import ArticleCard from '@/components/ui/ArticleCard';
 import { Command, CommandInput, CommandList, CommandItem, CommandGroup } from '@/components/ui/command';
@@ -8,8 +7,10 @@ import { Button } from '@/components/ui/button';
 import LoadingSpinner from '@/components/ui/LoadingState';
 import ListSelectionDropdown from "@/components/ui/ListSelectionDropdown";
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
+import { Database } from '@/lib/database.types';
 
 export interface ArticleType {
+  id: string;
   title: string;
   content: string;
   url: string;
@@ -27,21 +28,21 @@ export interface ArticleType {
 }
 
 const ArticlesComponent = ({ userId }: { userId: string }) => {
-  const [articles, setArticles] = useState([]);
+  const [articles, setArticles] = useState<Database['public']['Tables']['articles']['Row'][]>([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState([]);
+  const [searchResults, setSearchResults] = useState<Database['public']['Tables']['articles']['Row'][]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [suggestions, setSuggestions] = useState([
+  const suggestions = [
     "Find articles about recent election results",
     "Show me the latest news on foreign policy",
     "Find articles related to healthcare reform",
     "Search for news on economic policies",
     "I want to read about immigration debates"
-  ]);
+  ];
   const [searchLoading, setSearchLoading] = useState(false);
   const [selectedArticles, setSelectedArticles] = useState<string[]>([]);
   const [selectedList, setSelectedList] = useState('');
-  const [lists, setLists] = useState([]);
+  // const [lists, setLists] = useState([]);
 
   const refreshDatabase = async () => {
     try {
@@ -73,22 +74,20 @@ const ArticlesComponent = ({ userId }: { userId: string }) => {
   const fetchArticles = async () => {
     try {
       const { data, error } = await supabase
-        .from('articles')
-        .select('*');
+      .from('articles')
+      .select('*');
 
       if (error) throw error;
-      setArticles(data);
+      setArticles(data as any);    
     } catch (error) {
       console.error("Error fetching articles:", error);
     }
   };
 
-  const groupArticlesBySource = (articles) => {
-    return articles.reduce((acc, article) => {
+  const groupArticlesBySource = (articles: Database['public']['Tables']['articles']['Row'][]) => {
+    return articles.reduce<Record<string, Database['public']['Tables']['articles']['Row'][]>>((acc, article) => {
       const source = article.source || 'Unknown Source';
-      if (!acc[source]) {
-        acc[source] = [];
-      }
+      acc[source] = acc[source] || [];
       acc[source].push(article);
       return acc;
     }, {});
@@ -139,13 +138,13 @@ const ArticlesComponent = ({ userId }: { userId: string }) => {
     if (!selectedList || selectedArticles.length === 0) return;
 
     try {
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('list_articles')
         .insert(selectedArticles.map(articleId => ({
           user_id: userId,
           list_id: selectedList,
           article_id: articleId
-        })));
+        } as any)));
 
       if (error) throw error;
 
@@ -172,9 +171,10 @@ const ArticlesComponent = ({ userId }: { userId: string }) => {
             value={searchQuery}
             onFocus={() => setShowSuggestions(true)}
             onBlur={() => setTimeout(() => setShowSuggestions(false), 100)}
-            onInput={(e) => {
-              setSearchQuery(e.target.value);
-              if (e.target.value === "") {
+            onInput={(e: React.FormEvent<HTMLInputElement>) => {
+              const value = e.currentTarget.value;
+              setSearchQuery(value);
+              if (value === "") {
                 setSearchResults([]);
               } else {
                 handleSearch();
@@ -202,7 +202,7 @@ const ArticlesComponent = ({ userId }: { userId: string }) => {
         />
       </div>
       <Masonry
-        breakpointCols={breakpointColumnsObj}
+        columns={breakpointColumnsObj}
         spacing={2}
       >
         {searchQuery.trim() !== "" ? (
