@@ -5,7 +5,7 @@ import LandingPageComponent from '@/components/LandingPage';
 
 export default function HomePage() {
   return (
-    <SinglePageLayout>
+    <SinglePageLayout home={true}>
       <LandingPageComponent/>
     </SinglePageLayout>
   );
