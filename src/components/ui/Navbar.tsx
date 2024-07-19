@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { Search, List, Map, Home, Settings, LogIn, LogOut } from 'lucide-react';
+import { Search, List, Map, Home, LogIn, LogOut } from 'lucide-react';
 import LoginDialog from './LoginDialog';
 import { useAuth } from '@/hooks/useAuth';
 import supabase from '@/lib/supabaseClient';
@@ -18,12 +18,16 @@ const navItems = [
   { href: '/search', label: 'Search', icon: Search },
   { href: '/lists', label: 'Lists', icon: List },
   { href: '/extraction', label: 'Extraction', icon: Map },
-  { href: '/settings', label: 'Settings', icon: Settings },
 ];
 
-const Navbar = () => {
+interface NavbarProps {
+  isCollapsed: boolean;
+  setIsCollapsed: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+const Navbar: React.FC<NavbarProps> = ({ isCollapsed, setIsCollapsed }) => {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
-  const [isCollapsed, setIsCollapsed] = useState(true);
+  // const [isCollapsed, setIsCollapsed] = useState(true);
   const { userId, setSession, userEmail } = useAuth();
   const pathname = usePathname();
 
@@ -42,7 +46,7 @@ const Navbar = () => {
   }, [userEmail]);
 
   return (
-    <nav className={`fixed left-0 top-0 h-full ${isCollapsed ? 'w-[5%]' : 'w-64'} bg-gradient-to-b from-purple-100 via-purple-50 to-white text-white p-4 transition-width duration-300`}>
+    <main className={`sticky top-0 h-full ${isCollapsed ? 'w-auto' : 'w-64'} bg-gradient-to-b from-purple-100 via-purple-50 to-white text-white p-4 transition-width duration-300 z-50`}>      
       <Button variant="ghost" onClick={() => setIsCollapsed(!isCollapsed)} className="text-purple-800">
           {isCollapsed ? <ChevronRight className="h-5 w-5" /> : <ChevronLeft className="h-5 w-5" />}
       </Button>
@@ -56,7 +60,7 @@ const Navbar = () => {
           />
         </Link>
         {!isCollapsed && (
-          <p className="text-lg font-semibold text-purple-800">Commonwealth.ai</p>
+          <p className="text-lg font-light text-purple-800">Welcome to V2!</p>
         )}
       </div>
       <ul className="space-y-2 mt-40">
@@ -79,9 +83,9 @@ const Navbar = () => {
               )}
               {isCollapsed && (
                 <motion.div
-                  className={`text-purple-900 flex items-center justify-center py-2 px-4 rounded-lg font-medium transition-colors ${isActive ? 'bg-purple-900 shadow-md text-white' : 'hover:bg-purple-900/75 hover:text-white'}`}
+                  className={`text-purple-900 min-w-[1.6rem] min-h-[1.6rem] flex items-center justify-center p-2 rounded-lg font-medium transition-colors ${isActive ? 'bg-purple-900 shadow-md text-white' : 'hover:bg-purple-900/75 hover:text-white'}`}
                 >
-                  <item.icon className="h-5 w-5" />
+                  <item.icon className="h-5 w-5 min-w-[1.25rem] min-h-[1.25rem]" />
                 </motion.div>
               )}
               </Link>
@@ -125,7 +129,7 @@ const Navbar = () => {
         )}
       </ul>
       <LoginDialog open={isLoginOpen} onClose={() => setIsLoginOpen(false)} />
-    </nav>
+    </main>
   );
 };
 
