@@ -63,7 +63,7 @@ const ListManager = ({ userId }: { userId: string }) => {
   }, [lists]);
 
   return (
-    <div className="flex flex-col items-start">
+    <div className="flex flex-col items-start flex-1">
       <div className="flex flex-col items-start mb-4">
         <div className="flex items-start space-x-2 mt-5 mb-4 w-full">
             <Input
