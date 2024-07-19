@@ -46,7 +46,7 @@ export const features = [
   },
   {
     Icon: MagicWandIcon,
-    title: "LLM-Powered Extraction",
+    title: "LLM-Powered Data Extraction",
     name: "",
     description:
       "Easily extract structured data from thousands of curated news articles. Built with OpenAI, Postgres, and Elasticsearch.",

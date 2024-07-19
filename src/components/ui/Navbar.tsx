@@ -60,7 +60,7 @@ const Navbar: React.FC<NavbarProps> = ({ isCollapsed, setIsCollapsed }) => {
           />
         </Link>
         {!isCollapsed && (
-          <p className="text-lg font-light text-purple-800">Commonwealth.ai</p>
+          <p className="text-lg font-light text-purple-800">Welcome to V2!</p>
         )}
       </div>
       <ul className="space-y-2 mt-40">
