@@ -31,7 +31,7 @@ export const features = [
     title: "Quick Structured Lists",
     name: "",
     description:
-      "Quickly extract structured data from thousands of curated news articles. Built with OpenAI, Postgres, and Elasticsearch.",
+      "Quickly build specific bulk lists of trending news articles to export and extract information from. You can also just ask Commonwealth.ai and we can create them for you in an instant!",
     href: "https://commonwealthai.netlify.app/lists",
     cta: "Reach out to learn more!",
     background: React.createElement(Image, {
@@ -49,7 +49,7 @@ export const features = [
     title: "LLM-Powered Data Extraction",
     name: "",
     description:
-      "Easily extract structured data from thousands of curated news articles. Built with OpenAI, Postgres, and Elasticsearch.",
+      "With just a natural language prompt, easily extract structured data from thousands of curated news articles in bulk, which can be exported in both JSON and tabular formats.",
     href: "https://commonwealthai.netlify.app/extraction",
     cta: "Reach out to learn more!",
     background: React.createElement(Image, {

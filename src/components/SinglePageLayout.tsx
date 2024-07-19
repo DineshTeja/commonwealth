@@ -17,7 +17,9 @@ const SinglePageLayout: React.FC<BaseLayoutProps> = ({ children }) => {
       />
       <main className={`flex-1 transition-all duration-300 ml-auto min-h-screen`}>
         {children}
-        <Footer />
+        <div className="flex justify-center items-center">
+          <Footer />
+        </div>
       </main>
     </div>
   );

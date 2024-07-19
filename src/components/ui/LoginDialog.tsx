@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Dialog, DialogTitle, DialogContent } from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import { Button } from "@/components/ui/button";
 import supabase from '@/lib/supabaseClient';
 import { useAuth } from '@/hooks/useAuth';
@@ -62,9 +62,68 @@ const LoginDialog: React.FC<LoginDialogProps> = ({ open, onClose }) => {
   };
 
   return (
-    <Dialog open={open} onClose={onClose}>
-      <DialogTitle>{isSignUp ? 'Sign Up' : 'Login'}</DialogTitle>
-      <DialogContent>
+    // <Dialog open={open} onClose={onClose}>
+    //   <DialogTitle>{isSignUp ? 'Sign Up' : 'Login'}</DialogTitle>
+    //   <DialogContent>
+    //     <form onSubmit={handleAuth}>
+    //       <input
+    //         type="email"
+    //         value={email}
+    //         onChange={(e) => setEmail(e.target.value)}
+    //         placeholder="Email"
+    //         className="w-full p-2 mb-4 border rounded"
+    //       />
+    //       <input
+    //         type="password"
+    //         value={password}
+    //         onChange={(e) => setPassword(e.target.value)}
+    //         placeholder="Password"
+    //         className="w-full p-2 mb-4 border rounded"
+    //       />
+    //       {isSignUp && (
+    //         <>
+    //           <input
+    //             type="text"
+    //             value={firstName}
+    //             onChange={(e) => setFirstName(e.target.value)}
+    //             placeholder="First Name"
+    //             className="w-full p-2 mb-4 border rounded"
+    //           />
+    //           <input
+    //             type="text"
+    //             value={lastName}
+    //             onChange={(e) => setLastName(e.target.value)}
+    //             placeholder="Last Name"
+    //             className="w-full p-2 mb-4 border rounded"
+    //           />
+    //         </>
+    //       )}
+    //       <Button type="submit">{isSignUp ? 'Sign Up' : 'Login'}</Button>
+    //     </form>
+    //     <Button onClick={() => setIsSignUp(!isSignUp)} className="mt-2">
+    //       {isSignUp ? 'Already have an account? Login' : 'Need an account? Sign Up'}
+    //     </Button>
+    //     {message && <p className="mt-2 text-red-500">{message}</p>}
+    //   </DialogContent>
+    // </Dialog>
+
+    <Dialog 
+    open={open} 
+    onClose={onClose} 
+    fullWidth 
+    maxWidth="md" 
+    PaperProps={{ style: { borderRadius: 16 }}}
+    >
+    <DialogContent>
+      <div className="flex flex-col w-full overflow-scroll">
+        <div className="flex flex-col items-center justify-center gap-1 p-12 text-center">
+          <div className="font-extrabold text-3xl text-slate-800">
+            {isSignUp ? 'Join Commonwealth.ai' : 'Login to Commonwealth.ai'}
+          </div>
+          <div className="text-slate-500 font-medium">
+          {isSignUp ? 'We are excited to have you!' : 'Welcome Back!'}
+          </div>
+        </div>
         <form onSubmit={handleAuth}>
           <input
             type="email"
@@ -98,13 +157,11 @@ const LoginDialog: React.FC<LoginDialogProps> = ({ open, onClose }) => {
               />
             </>
           )}
-          <Button type="submit">{isSignUp ? 'Sign Up' : 'Login'}</Button>
+          <Button type="submit" className="w-full bg-purple-900">{isSignUp ? 'Sign Up' : 'Login'}</Button>
         </form>
-        <Button onClick={() => setIsSignUp(!isSignUp)} className="mt-2">
-          {isSignUp ? 'Already have an account? Login' : 'Need an account? Sign Up'}
-        </Button>
-        {message && <p className="mt-2 text-red-500">{message}</p>}
-      </DialogContent>
+        <Button onClick={() => setIsSignUp(!isSignUp)} className="w-full mt-2">{isSignUp ? 'Already have an account? Login' : 'Need an account? Sign Up'}</Button>
+      </div>
+    </DialogContent>
     </Dialog>
   );
 };
