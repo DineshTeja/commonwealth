@@ -14,11 +14,13 @@ const SinglePageLayout: React.FC<BaseLayoutProps> = ({ userId, children, home=fa
 
   return (
       <div className="flex min-h-screen">
-        <Navbar 
-          isCollapsed={isNavbarCollapsed} 
-          setIsCollapsed={setIsNavbarCollapsed}
-        />
-        <main className={`flex-1 transition-all duration-300 ml-auto min-h-screen`}>
+        <div className="hidden md:block">
+          <Navbar 
+            isCollapsed={isNavbarCollapsed} 
+            setIsCollapsed={setIsNavbarCollapsed}
+          />
+        </div>
+        <main className={`flex-1 transition-all duration-300 min-h-screen overflow-x-hidden ${isNavbarCollapsed ? 'mx-[5%]' : 'ml-auto'}`}>
           {!home ?
             (<RouteGuard userId={userId ?? ''}>
               {children}

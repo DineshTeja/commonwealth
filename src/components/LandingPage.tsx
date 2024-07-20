@@ -12,14 +12,14 @@ import { MegaphoneIcon } from '@heroicons/react/24/solid';
 
 export default function LandingPageComponent () {
     return (
-        <div className="min-h-screen flex flex-col items-center justify-center flex-1 transition-all duration-300"> 
+        <div className="min-h-screen flex flex-col items-center justify-center flex-1 transition-all duration-300 w-full overflow-x-hidden"> 
         <header className="w-full max-w-[80%] flex items-center justify-between p-6">
           <div className="flex items-center space-x-2">
             <Image src="/images/commonwealth.png" alt="Commonwealth.ai" width={50} height={50}/>
             <span className="text-xl text-purple-800 font-light">Commonwealth.ai</span>
           </div>
           <Link href="https://calendly.com/dineshvasireddy/lets-chat">
-          <Button variant="default" className="bg-purple-800 hover:bg-purple-700 text-white rounded-3xl mt-4">
+            <Button variant="default" className="hidden sm:block bg-purple-800 hover:bg-purple-700 text-white rounded-3xl mt-4">
               Book a demo
             </Button>
           </Link>
@@ -44,8 +44,8 @@ export default function LandingPageComponent () {
               </Button>
             </Link>
           </div>
-          <section className="relative flex justify-center mt-20 transition-transform duration-500 px-10">
-            <Carousel defaultValue={1} className="relative w-full max-w-4xl">
+          <section className="relative flex justify-center mt-20 transition-transform duration-500 px-4 w-full max-w-4xl">
+            <Carousel defaultValue={1} className="relative w-full">
               <CarouselItem className="relative">
                 <div className="absolute top-0 left-0 transform rotate-[-5deg] z-10">
                   <Image src="/images/dashboard1.png" alt="Dashboard preview 1" width={1000} height={500} className="rounded-lg shadow-lg"/>
@@ -62,36 +62,36 @@ export default function LandingPageComponent () {
               </CarouselItem>
             </Carousel>
           </section>
-          <section className="mt-80">
-            <div className="flex justify-center space-x-20">
+          <section className="mt-[200px] w-full px-4">
+            <div className="flex flex-col md:flex-row justify-center space-y-10 md:space-y-0 md:space-x-20">
               <div className="text-center">
-                <p className="whitespace-pre-wrap text-8xl font-medium tracking-tighter text-purple-900 dark:text-white">
+                <p className="whitespace-pre-wrap text-7xl font-medium tracking-tighter text-purple-900 dark:text-white">
                   <NumberTicker value={2133} className="text-purple-900" />
                 </p>
                 <div className="mt-8 text-2xl font-medium bg-gradient-to-r from-purple-500 to-pink-300 bg-clip-text text-transparent">Users (40% Active)</div>
               </div>
               <div className="text-center">
-                <p className="whitespace-pre-wrap text-8xl font-medium tracking-tighter text-purple-900 dark:text-white">
+                <p className="whitespace-pre-wrap text-7xl font-medium tracking-tighter text-purple-900 dark:text-white">
                   <NumberTicker value={12000} className="text-purple-900"/>+
                 </p>
                 <div className="mt-8 text-2xl font-medium bg-gradient-to-r from-purple-500 to-pink-300 bg-clip-text text-transparent">Articles Processed</div>
               </div>
               <div className="text-center">
-                <p className="whitespace-pre-wrap text-8xl font-medium tracking-tighter text-purple-900 dark:text-white">
+                <p className="whitespace-pre-wrap text-7xl font-medium tracking-tighter text-purple-900 dark:text-white">
                   <NumberTicker value={15} className="text-purple-900"/>
                 </p>
                 <div className="mt-8 text-2xl font-medium bg-gradient-to-r from-purple-500 to-pink-300 bg-clip-text text-transparent">Active Political Campaigns</div>
               </div>
             </div>
           </section>
-          <section id="projects" className="mt-20 scroll-mt-28 mb-20 overflow-x-hidden px-4">
+          <section id="projects" className="mt-20 scroll-mt-28 mb-20 overflow-x-hidden px-4 w-full">
             <div className="flex flex-col space-y-10">
               {features.map((feature, index) => {
                 const { description, title, ...featureProps } = feature;
                 return (
                   <div key={feature.name} className={`flex flex-col lg:flex-row ${index % 2 === 0 ? 'lg:flex-row-reverse' : ''} items-center`}>
-                    <div className="flex-1 p-6">
-                      <BentoCard {...featureProps} description={""} />
+                    <div className="w-full lg:flex-1">
+                      <BentoCard className="h-auto w-full" {...featureProps} description={""} />
                     </div>
                     <div className={`flex-1 p-6 ${index % 2 === 0 ? 'text-left items-start justify-start' : 'text-right items-end justify-end'}`}>
                         <div className={`${feature.title==="LLM-Powered Data Extraction" ? 'flex': ''} text-2xl font-medium bg-gradient-to-r from-purple-500 to-pink-300 bg-clip-text text-transparent items-center`}>
