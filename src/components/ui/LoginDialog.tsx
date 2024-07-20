@@ -73,7 +73,7 @@ const LoginDialog: React.FC<LoginDialogProps> = ({ open, onClose }) => {
       <div className="flex flex-col w-full overflow-scroll">
         <div className="flex flex-col items-center justify-center gap-1 p-12 text-center">
           <div className="font-extrabold text-3xl text-slate-800">
-            {isSignUp ? 'Join Commonwealth.ai' : 'Login to Commonwealth.ai'}
+            {isSignUp ? 'Join Commonwealth AI' : 'Login to Commonwealth AI'}
           </div>
           <div className="text-slate-500 font-medium">
           {isSignUp ? 'We are excited to have you!' : 'Welcome Back!'}

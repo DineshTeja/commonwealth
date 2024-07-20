@@ -32,7 +32,7 @@ export const features = [
     title: "Quick Structured Lists",
     name: "",
     description:
-      "Quickly build specific bulk lists of trending news articles to export and extract information from. You can also just ask Commonwealth.ai and we can create them for you in an instant!",
+      "Quickly build specific bulk lists of trending news articles to export and extract information from. You can also just ask Commonwealth AI and we can create them for you in an instant!",
     href: "https://commonwealthai.netlify.app/lists",
     cta: "Reach out to learn more!",
     background: React.createElement(Image, {

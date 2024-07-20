@@ -16,7 +16,7 @@ export default function LandingPageComponent () {
         <header className="w-full max-w-[80%] flex items-center justify-between p-6">
           <div className="flex items-center space-x-2">
             <Image src="/images/commonwealth.png" alt="Commonwealth.ai" width={50} height={50}/>
-            <span className="text-xl text-purple-800 font-light">Commonwealth.ai</span>
+            <span className="text-xl text-purple-800 font-light">Commonwealth AI</span>
           </div>
           <Link href="https://calendly.com/dineshvasireddy/lets-chat">
             <Button variant="default" className="hidden sm:block bg-purple-800 hover:bg-purple-700 text-white rounded-3xl mt-4">
@@ -33,7 +33,7 @@ export default function LandingPageComponent () {
                   `inline animate-gradient bg-gradient-to-r from-[#ffaa40] via-[#9c40ff] to-[#ffaa40] bg-[length:var(--bg-size)_100%] bg-clip-text text-transparent`,
                 )}
               >
-                Welcome to V2 of Commonwealth.ai
+                Welcome to V2 of Commonwealth AI
               </span>
             </AnimatedGradientText>
             <div className="p-3 text-5xl font-bold bg-gradient-to-r from-purple-500 to-pink-300 bg-clip-text text-transparent">Building a Standard for News</div>
