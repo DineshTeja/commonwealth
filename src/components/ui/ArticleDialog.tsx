@@ -115,7 +115,7 @@ function ArticleDialog({ open, onClose, article }: ArticleDialogProps) {
         </div>
         <div className="flex flex-row gap-2 w-full border border-slate-200 rounded-xl bg-white mt-4">
           <ReactTextareaAutosize
-            placeholder="Chat with Commonwealth.ai"
+            placeholder="Chat with Commonwealth AI"
             value={chatInput}
             disabled={isAnswering}
             onChange={(e) => setChatInput(e.target.value)}

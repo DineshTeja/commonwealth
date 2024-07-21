@@ -20,7 +20,7 @@ export default function SettingsPage() {
                   WebkitTextFillColor: "transparent",
                 }}
               >
-                Commonwealth.ai
+                Commonwealth AI
               </div>
               <div className="text-slate-500 font-normal">
                 <strong>instantly</strong> transform political media into <strong>structured data</strong>. 
