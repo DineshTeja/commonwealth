@@ -8,7 +8,7 @@ export default function Footer() {
       </small>
       <p className="text-sm sm:text-xs py-2">
         <span className="font-semibold text-sm sm:text-xs">Powered by </span> 
-        React-NextJS, MagicUI, Supabase, Deno, OpenAI, TailwindCSS, Vercel
+        React-NextJS, MagicUI, Supabase, Deno, OpenAI, TailwindCSS, Netlify
       </p>
       <strong className="text-blue-500 mb-2 block text-base pt-2 sm:text-xs">
         dineshvasireddy@college.harvard.edu

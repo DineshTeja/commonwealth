@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import supabase from '@/lib/supabaseClient';
 import Masonry from "@mui/lab/Masonry";
 import ArticleCard from '@/components/ui/ArticleCard';
-import { Command, CommandInput, CommandList, CommandItem, CommandGroup } from '@/components/ui/command';
+import { Command, CommandInput, CommandList, CommandItem, CommandGroup, CommandEmpty } from '@/components/ui/command';
 import { Button } from '@/components/ui/button';
 import LoadingSpinner from '@/components/ui/LoadingState';
 import ListSelectionDropdown from "@/components/ui/ListSelectionDropdown";
@@ -183,6 +183,7 @@ const ArticlesComponent = ({ userId }: { userId: string }) => {
           />
           {showSuggestions ? (
             <CommandList className="w-full mt-1 bg-white shadow-lg rounded-xl">
+              <CommandEmpty>No results found.</CommandEmpty>
               <CommandGroup heading="Suggestions">
                 {suggestions.map((suggestion, index) => (
                   <CommandItem key={index} onSelect={() => setSearchQuery(suggestion)}>
